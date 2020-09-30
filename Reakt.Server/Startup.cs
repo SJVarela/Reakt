@@ -6,6 +6,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Reakt.Persistance.DataAccess;
+using Reakt.Persistance.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,7 +26,8 @@ namespace Reakt.Server
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
-        {
+        {            
+            services.AddPersistence(Configuration);
             services.AddControllers();
             //For testing!
             services.AddCors(opt => opt.AddDefaultPolicy(builder => builder.AllowAnyOrigin()));
