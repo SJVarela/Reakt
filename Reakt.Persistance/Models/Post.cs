@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Reakt.Persistance.DataAccess
+namespace Reakt.Persistance.Models
 {
-    public class ReaktDbContext
+    public class Post
     {
     }
 }
