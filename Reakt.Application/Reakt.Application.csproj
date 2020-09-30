@@ -4,4 +4,9 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Reakt.Application.Contracts\Reakt.Application.Contracts.csproj" />
+    <ProjectReference Include="..\Reakt.Domain\Reakt.Domain.csproj" />
+  </ItemGroup>
+
 </Project>

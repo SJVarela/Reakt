@@ -6,5 +6,8 @@ namespace Reakt.Persistance.Models
 {
     public class Post
     {
+        public string Title { get; set; }
+        public string Description { get; set; }
+        public virtual IEnumerable<Comment> Comments { get; set; }
     }
 }
