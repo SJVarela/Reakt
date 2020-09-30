@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Reakt.Persistance.Models
+namespace Reakt.Application.Persistence.Models
 {
     public class Post
     {
