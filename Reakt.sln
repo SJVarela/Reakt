@@ -3,9 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30524.135
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Reakt.Client", "Reakt.Client\Reakt.Client.csproj", "{41870C17-20F1-4002-992E-66FCF7598107}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Reakt.Client", "Reakt.Client\Reakt.Client.csproj", "{41870C17-20F1-4002-992E-66FCF7598107}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Reakt.Server", "Reakt.Server\Reakt.Server.csproj", "{3DB8D402-29B4-44FB-A27A-7EDB35124308}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Reakt.Server", "Reakt.Server\Reakt.Server.csproj", "{3DB8D402-29B4-44FB-A27A-7EDB35124308}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Reakt.Domain", "Reakt.Domain\Reakt.Domain.csproj", "{61C07E91-F9A7-4519-95E5-1C57799BCF29}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Reakt.Persistance", "Reakt.Persistance\Reakt.Persistance.csproj", "{4C337B93-8E57-4FF4-971D-65C9375545B4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Reakt.Application", "Reakt.Application\Reakt.Application.csproj", "{FD5462E9-3846-4440-AB00-0AB1A468BB14}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +27,18 @@ Global
 		{3DB8D402-29B4-44FB-A27A-7EDB35124308}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3DB8D402-29B4-44FB-A27A-7EDB35124308}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3DB8D402-29B4-44FB-A27A-7EDB35124308}.Release|Any CPU.Build.0 = Release|Any CPU
+		{61C07E91-F9A7-4519-95E5-1C57799BCF29}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{61C07E91-F9A7-4519-95E5-1C57799BCF29}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{61C07E91-F9A7-4519-95E5-1C57799BCF29}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{61C07E91-F9A7-4519-95E5-1C57799BCF29}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4C337B93-8E57-4FF4-971D-65C9375545B4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4C337B93-8E57-4FF4-971D-65C9375545B4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4C337B93-8E57-4FF4-971D-65C9375545B4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4C337B93-8E57-4FF4-971D-65C9375545B4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FD5462E9-3846-4440-AB00-0AB1A468BB14}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FD5462E9-3846-4440-AB00-0AB1A468BB14}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FD5462E9-3846-4440-AB00-0AB1A468BB14}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FD5462E9-3846-4440-AB00-0AB1A468BB14}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
