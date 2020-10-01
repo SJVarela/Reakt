@@ -52,6 +52,7 @@ namespace Reakt.Server
 
             //DI services
             services.AddScoped<ICommentService, CommentService>();
+            services.AddScoped<IBoardService, BoardService>();
 
         }
 
