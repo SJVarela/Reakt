@@ -25,6 +25,7 @@ namespace Reakt.Server.Controllers
             _mapper = mapper;
         }
         [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public ActionResult<IEnumerable<Comment>> Get()
         {
             try
@@ -35,14 +36,22 @@ namespace Reakt.Server.Controllers
             {
                 _logger.LogError(ex, ex.Message);
                 return StatusCode(StatusCodes.Status500InternalServerError);
-            }            
+            }
         }
-        [HttpGet]
-        [Route("{id}")]
-        public Comment Get(long id)
+        [HttpGet("{id}")]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public ActionResult<Comment> Get(long id)
         {
-            _logger.LogInformation("I am informing");
-            return _mapper.Map<Comment>(_commentService.Get(id));
+            try
+            {
+                return Ok(_mapper.Map<Comment>(_commentService.Get(id)));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
         }
     }
 }
