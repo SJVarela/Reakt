@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using AutoMapper;
 using Castle.Core.Logging;
@@ -59,7 +60,19 @@ namespace Reakt.Application.Tests.Unit
 
             //Arrange
             result.Should().BeEquivalentTo(_mapper.Map<List<Domain.Models.Board>>(_mockData));
-            //CollectionAssert.AreEqual(_mapper.Map<List<Domain.Models.Board>>(_mockData), result, Comparer.Default);
+        }
+        [Test]
+        public void Get_by_Id_Should_Return_Results()
+        {
+            //Arrange
+            _context.Boards.AddRange(_mockData);
+            _context.SaveChanges();
+
+            //Act
+            var result = _boardService.Get(1);
+
+            //Arrange            
+            result.Should().BeEquivalentTo(_mapper.Map<Domain.Models.Board>(_mockData.First(b => b.Id == 1)));
         }
     }
 }
