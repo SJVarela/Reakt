@@ -7,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.OpenApi.Models;
 using Reakt.Application.Contracts.Interfaces;
 using Reakt.Application.Services;
 using Reakt.Persistance.DataAccess;
@@ -54,6 +55,7 @@ namespace Reakt.Server
             services.AddScoped<ICommentService, CommentService>();
             services.AddScoped<IBoardService, BoardService>();
 
+            services.AddSwaggerGen(c => c.SwaggerDoc("v1", new OpenApiInfo() { Title = "Reakt API" }));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -63,7 +65,11 @@ namespace Reakt.Server
             {
                 app.UseDeveloperExceptionPage();
             }
-
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Reakt API v1");
+            });
             app.UseHttpsRedirection();
             //For testing only
             app.UseCors();
