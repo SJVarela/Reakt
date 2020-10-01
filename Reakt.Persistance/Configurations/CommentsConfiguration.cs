@@ -9,6 +9,8 @@ namespace Reakt.Persistance.Configurations
     {
         public void Configure(EntityTypeBuilder<Comment> builder)
         {
+            builder.Property(e => e.Id)
+                .UseIdentityColumn();
             builder.Property(e => e.Message)
                 .IsRequired()                
                 .HasMaxLength(4000);

@@ -1,3 +1,4 @@
+using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -6,6 +7,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Reakt.Application.Contracts.Interfaces;
+using Reakt.Application.Services;
 using Reakt.Persistance.DataAccess;
 using Reakt.Persistance.DependencyInjection;
 using System;
@@ -26,8 +29,11 @@ namespace Reakt.Server
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
-        {            
+        {
+
+            services.AddLogging(conf => conf.AddConsole());
             services.AddPersistence(Configuration);
+            services.AddAutoMapper(typeof(Startup));
             services.AddControllers();
             //For testing!
             services.AddCors(opt => opt.AddDefaultPolicy(builder => builder.AllowAnyOrigin()));
@@ -43,6 +49,10 @@ namespace Reakt.Server
                 });
             });
             */
+
+            //DI services
+            services.AddScoped<ICommentService, CommentService>();
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

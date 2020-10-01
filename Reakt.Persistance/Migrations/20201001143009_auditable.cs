@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Reakt.Persistance.Migrations
 {
-    public partial class Initial : Migration
+    public partial class auditable : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -11,11 +11,12 @@ namespace Reakt.Persistance.Migrations
                 name: "Boards",
                 columns: table => new
                 {
-                    Id = table.Column<decimal>(nullable: false),
+                    Id = table.Column<long>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     Active = table.Column<bool>(nullable: false),
                     CreatedAt = table.Column<DateTime>(nullable: false),
-                    UpdatedAt = table.Column<DateTime>(nullable: false),
-                    DeletedAt = table.Column<DateTime>(nullable: false),
+                    UpdatedAt = table.Column<DateTime>(nullable: true),
+                    DeletedAt = table.Column<DateTime>(nullable: true),
                     Title = table.Column<string>(maxLength: 200, nullable: false),
                     Description = table.Column<string>(maxLength: 600, nullable: false)
                 },
@@ -28,14 +29,15 @@ namespace Reakt.Persistance.Migrations
                 name: "Posts",
                 columns: table => new
                 {
-                    Id = table.Column<decimal>(nullable: false),
+                    Id = table.Column<long>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     Active = table.Column<bool>(nullable: false),
                     CreatedAt = table.Column<DateTime>(nullable: false),
-                    UpdatedAt = table.Column<DateTime>(nullable: false),
-                    DeletedAt = table.Column<DateTime>(nullable: false),
+                    UpdatedAt = table.Column<DateTime>(nullable: true),
+                    DeletedAt = table.Column<DateTime>(nullable: true),
                     Title = table.Column<string>(maxLength: 200, nullable: false),
                     Description = table.Column<string>(maxLength: 600, nullable: false),
-                    BoardId = table.Column<decimal>(nullable: true)
+                    BoardId = table.Column<long>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -52,15 +54,16 @@ namespace Reakt.Persistance.Migrations
                 name: "Comments",
                 columns: table => new
                 {
-                    Id = table.Column<decimal>(nullable: false),
+                    Id = table.Column<long>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     Active = table.Column<bool>(nullable: false),
                     CreatedAt = table.Column<DateTime>(nullable: false),
-                    UpdatedAt = table.Column<DateTime>(nullable: false),
-                    DeletedAt = table.Column<DateTime>(nullable: false),
+                    UpdatedAt = table.Column<DateTime>(nullable: true),
+                    DeletedAt = table.Column<DateTime>(nullable: true),
                     Message = table.Column<string>(maxLength: 4000, nullable: false),
-                    ParentId = table.Column<decimal>(nullable: true),
+                    ParentId = table.Column<long>(nullable: true),
                     Likes = table.Column<int>(nullable: false),
-                    PostId = table.Column<decimal>(nullable: true)
+                    PostId = table.Column<long>(nullable: true)
                 },
                 constraints: table =>
                 {

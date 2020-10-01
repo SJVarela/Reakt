@@ -6,7 +6,7 @@ namespace Reakt.Application.Persistence
 {
     public abstract class BaseEntity
     {
-        public ulong Id { get; set; }
+        public long Id { get; set; }
         public bool Active { get; set; }
     }
 }

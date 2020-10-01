@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 
 namespace Reakt.Application.Services
 {
@@ -24,22 +25,23 @@ namespace Reakt.Application.Services
             throw new NotImplementedException();
         }
 
-        public void Delete(ulong id)
+        public void Delete(long id)
         {
             throw new NotImplementedException();
         }
 
-        public Comment Get(ulong id)
+        public Comment Get(long id)
         {
-            return _mapper.Map<Comment>(_dbContext.Comments.First(x => x.Id == id));
+            var result = _dbContext.Comments.Where(x => x.Id == id).FirstOrDefault();
+            return _mapper.Map<Comment>(result);
         }
 
         public IEnumerable<Comment> Get()
         {
-            throw new NotImplementedException();
+            return _mapper.Map<IEnumerable<Comment>>(_dbContext.Comments.ToList());
         }
 
-        public void Like(ulong id)
+        public void Like(long id)
         {
             throw new NotImplementedException();
         }

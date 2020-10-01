@@ -8,6 +8,7 @@ namespace Reakt.Application.Persistence.Models
     {
         public string Title { get; set; }
         public string Description { get; set; }
+        public long BoardId { get; set; }
         public virtual IEnumerable<Comment> Comments { get; set; }
     }
 }

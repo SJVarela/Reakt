@@ -10,8 +10,8 @@ using Reakt.Persistance.DataAccess;
 namespace Reakt.Persistance.Migrations
 {
     [DbContext(typeof(ReaktDbContext))]
-    [Migration("20200930205851_Initial")]
-    partial class Initial
+    [Migration("20201001143009_auditable")]
+    partial class auditable
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -23,9 +23,12 @@ namespace Reakt.Persistance.Migrations
 
             modelBuilder.Entity("Reakt.Application.Persistence.Models.Board", b =>
                 {
-                    b.Property<decimal>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("decimal(20,0)");
+                        .HasColumnType("bigint")
+                        .HasAnnotation("SqlServer:IdentityIncrement", 1)
+                        .HasAnnotation("SqlServer:IdentitySeed", 1)
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<bool>("Active")
                         .HasColumnType("bit");
@@ -33,7 +36,7 @@ namespace Reakt.Persistance.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("DeletedAt")
+                    b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
@@ -46,7 +49,7 @@ namespace Reakt.Persistance.Migrations
                         .HasColumnType("nvarchar(200)")
                         .HasMaxLength(200);
 
-                    b.Property<DateTime>("UpdatedAt")
+                    b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
@@ -56,9 +59,12 @@ namespace Reakt.Persistance.Migrations
 
             modelBuilder.Entity("Reakt.Application.Persistence.Models.Comment", b =>
                 {
-                    b.Property<decimal>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("decimal(20,0)");
+                        .HasColumnType("bigint")
+                        .HasAnnotation("SqlServer:IdentityIncrement", 1)
+                        .HasAnnotation("SqlServer:IdentitySeed", 1)
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<bool>("Active")
                         .HasColumnType("bit");
@@ -66,7 +72,7 @@ namespace Reakt.Persistance.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("DeletedAt")
+                    b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("Likes")
@@ -77,13 +83,13 @@ namespace Reakt.Persistance.Migrations
                         .HasColumnType("nvarchar(4000)")
                         .HasMaxLength(4000);
 
-                    b.Property<decimal?>("ParentId")
-                        .HasColumnType("decimal(20,0)");
+                    b.Property<long?>("ParentId")
+                        .HasColumnType("bigint");
 
-                    b.Property<decimal?>("PostId")
-                        .HasColumnType("decimal(20,0)");
+                    b.Property<long?>("PostId")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTime>("UpdatedAt")
+                    b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
@@ -97,20 +103,23 @@ namespace Reakt.Persistance.Migrations
 
             modelBuilder.Entity("Reakt.Application.Persistence.Models.Post", b =>
                 {
-                    b.Property<decimal>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("decimal(20,0)");
+                        .HasColumnType("bigint")
+                        .HasAnnotation("SqlServer:IdentityIncrement", 1)
+                        .HasAnnotation("SqlServer:IdentitySeed", 1)
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<bool>("Active")
                         .HasColumnType("bit");
 
-                    b.Property<decimal?>("BoardId")
-                        .HasColumnType("decimal(20,0)");
+                    b.Property<long?>("BoardId")
+                        .HasColumnType("bigint");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("DeletedAt")
+                    b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
@@ -123,7 +132,7 @@ namespace Reakt.Persistance.Migrations
                         .HasColumnType("nvarchar(200)")
                         .HasMaxLength(200);
 
-                    b.Property<DateTime>("UpdatedAt")
+                    b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");

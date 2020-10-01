@@ -7,6 +7,6 @@ namespace Reakt.Application.Contracts.Interfaces
 {
     public interface ICommentService : ICrudService<Comment>
     {
-        void Like(ulong id);
+        void Like(long id);
     }
 }

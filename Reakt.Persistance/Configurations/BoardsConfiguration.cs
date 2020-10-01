@@ -11,6 +11,8 @@ namespace Reakt.Persistance.Configurations
     {
         public void Configure(EntityTypeBuilder<Board> builder)
         {
+            builder.Property(e => e.Id)
+                .UseIdentityColumn();
             builder.Property(e => e.Title)
                 .IsRequired()
                 .HasMaxLength(200);
