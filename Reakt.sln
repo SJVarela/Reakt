@@ -13,7 +13,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Reakt.Persistance", "Reakt.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Reakt.Application", "Reakt.Application\Reakt.Application.csproj", "{FD5462E9-3846-4440-AB00-0AB1A468BB14}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Reakt.Application.Contracts", "Reakt.Application.Contracts\Reakt.Application.Contracts.csproj", "{D45B0665-EFCC-4F63-8D68-C6D2829C69C8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Reakt.Application.Contracts", "Reakt.Application.Contracts\Reakt.Application.Contracts.csproj", "{D45B0665-EFCC-4F63-8D68-C6D2829C69C8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Reakt.Application.Tests", "Reakt.Application.Tests\Reakt.Application.Tests.csproj", "{CE0C0AF1-6042-4F9D-8D52-54ADA7613B7E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +47,10 @@ Global
 		{D45B0665-EFCC-4F63-8D68-C6D2829C69C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D45B0665-EFCC-4F63-8D68-C6D2829C69C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D45B0665-EFCC-4F63-8D68-C6D2829C69C8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CE0C0AF1-6042-4F9D-8D52-54ADA7613B7E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CE0C0AF1-6042-4F9D-8D52-54ADA7613B7E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CE0C0AF1-6042-4F9D-8D52-54ADA7613B7E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CE0C0AF1-6042-4F9D-8D52-54ADA7613B7E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
