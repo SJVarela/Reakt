@@ -5,7 +5,7 @@ using NUnit.Framework;
 
 namespace Reakt.Application.Tests.Unit
 {
-    //this is a test
+    //test change
     class BoardService
     {
         [SetUp]
