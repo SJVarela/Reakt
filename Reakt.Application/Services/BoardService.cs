@@ -37,7 +37,7 @@ namespace Reakt.Application.Services
 
         public Board Get(long id)
         {
-            throw new NotImplementedException();
+            return _mapper.Map<Board>(_dbContext.Boards.FirstOrDefault(b => b.Id == id));
         }
 
         public Board Update(Board enity)
