@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using AutoMapper;
 using Castle.Core.Logging;
 using FluentAssertions;
@@ -51,23 +52,23 @@ namespace Reakt.Application.Tests.Unit
         }
 
         [Test]
-        public void Get_Should_Return_Results()
+        public async Task Get_Should_Return_Results()
         {
             //Arrange
             var expected = _mapper.Map<List<Domain.Models.Board>>(_mockData);
             //Act
-            var result = _boardService.GetAsync();
+            var result = await _boardService.GetAsync();
 
             //Arrange
             result.Should().BeEquivalentTo(expected);
         }
         [Test]
-        public void Get_by_Id_Should_Return_Results()
+        public async Task Get_by_Id_Should_Return_Results()
         {
             //Arrange
             var expected = _mapper.Map<Domain.Models.Board>(_mockData.First(b => b.Id == 1));
             //Act
-            var result = _boardService.GetAsync(1);
+            var result = await _boardService.GetAsync(1);
 
             //Arrange            
             result.Should().BeEquivalentTo(expected);
