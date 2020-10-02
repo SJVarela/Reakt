@@ -8,7 +8,7 @@ namespace Reakt.Application.Contracts.Interfaces
 {
     public interface IPostService : ICrudServiceAsync<Post>
     {
-        Task<Post> CreateAsync(long boardId, Post entity);
+        Task<Post> AddAsync(long boardId, Post entity);
         Task<IEnumerable<Post>> GetForBoardAsync(long boardId);
 
     }
