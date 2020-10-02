@@ -12,7 +12,9 @@ namespace Reakt.Application.Persistence
     {
         DbSet<Comment> Comments { get; set; }
         DbSet<Post> Posts { get; set; }
-        public DbSet<Board> Boards { get; set; }
+        DbSet<Board> Boards { get; set; }
+        
+        int SaveChanges();
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken());
     }
 }
