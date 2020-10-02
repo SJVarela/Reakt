@@ -7,6 +7,8 @@ using System.Linq;
 using System.Text;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace Reakt.Application.Services
 {
@@ -20,6 +22,16 @@ namespace Reakt.Application.Services
             _dbContext = dbContext;
             _mapper = mapper;
         }
+
+        public async Task<Comment> AddComment(long postId, Comment comment)
+        {
+            Persistence.Models.Comment storedComment = _mapper.Map<Persistence.Models.Comment>(comment);
+            storedComment.PostId = postId;
+            storedComment = _dbContext.Comments.Add(storedComment).Entity;
+            await _dbContext.SaveChangesAsync();
+            return _mapper.Map<Comment>(storedComment);
+        }
+
         public Comment Create(Comment enity)
         {
             throw new NotImplementedException();
@@ -36,9 +48,18 @@ namespace Reakt.Application.Services
             return _mapper.Map<Comment>(result);
         }
 
-        public IEnumerable<Comment> Get()
+        public async Task<IEnumerable<Comment>> Get()
+        {            
+            return _mapper.Map<IEnumerable<Comment>>(
+                await _dbContext.Comments.ToListAsync());
+        }
+
+        public async Task<IEnumerable<Comment>> GetForPost(long postId)
         {
-            return _mapper.Map<IEnumerable<Comment>>(_dbContext.Comments.ToList());
+            return _mapper.Map<IEnumerable<Comment>>(
+                await _dbContext.Comments.Where(c => c.PostId == postId)
+                                         .OrderByDescending(c => c.CreatedAt)
+                                         .ToListAsync());
         }
 
         public void Like(long id)
@@ -47,6 +68,11 @@ namespace Reakt.Application.Services
         }
 
         public Comment Update(Comment enity)
+        {
+            throw new NotImplementedException();
+        }
+
+        IEnumerable<Comment> ICrudService<Comment>.Get()
         {
             throw new NotImplementedException();
         }
