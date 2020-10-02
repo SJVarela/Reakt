@@ -46,11 +46,11 @@ namespace Reakt.Server.Controllers
         [Route("boards/{boardId}/posts")]
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public ActionResult<IEnumerable<Post>> GetForBoard(long boardId)
+        public async Task<ActionResult<IEnumerable<Post>>> GetForBoard(long boardId)
         {
             try
             {
-                return Ok(_mapper.Map<IEnumerable<Post>>(_postService.GetForBoardAsync(boardId)));
+                return Ok(_mapper.Map<IEnumerable<Post>>(await _postService.GetForBoardAsync(boardId)));
             }
             catch (Exception ex)
             {
@@ -99,7 +99,7 @@ namespace Reakt.Server.Controllers
         {
             try
             {
-               // TODO: postDto.ApplyTo
+                // TODO: postDto.ApplyTo
                 var post = _mapper.Map<Domain.Models.Post>(postDto);
                 return Ok(_mapper.Map<Post>(_postService.UpdateAsync(post)));
             }
