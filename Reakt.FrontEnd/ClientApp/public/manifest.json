@@ -1,6 +1,6 @@
 {
-  "short_name": "Reakt.Client",
-  "name": "Reakt.Client",
+  "short_name": "Reakt.FrontEnd",
+  "name": "Reakt.FrontEnd",
   "icons": [
     {
       "src": "favicon.ico",
