@@ -10,8 +10,10 @@ namespace Reakt.Server.MapperConfig
     {
         public CommentProfile()
         {
-            CreateMap<Reakt.Domain.Models.Comment, Reakt.Server.Models.Comment>();
-            CreateMap<Reakt.Application.Persistence.Models.Comment, Reakt.Domain.Models.Comment>();
+            CreateMap<Domain.Models.Comment, Models.Comment>();
+            CreateMap<Models.Comment, Domain.Models.Comment>();
+            CreateMap<Application.Persistence.Models.Comment, Domain.Models.Comment>();
+            CreateMap<Domain.Models.Comment, Application.Persistence.Models.Comment>();
         }
     }
 }
