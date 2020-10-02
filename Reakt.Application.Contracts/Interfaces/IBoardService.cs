@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Reakt.Application.Contracts.Interfaces
 {
-    public interface IBoardService : ICrudService<Board>
+    public interface IBoardService : ICrudAsyncService<Board>
     {
     }
 }

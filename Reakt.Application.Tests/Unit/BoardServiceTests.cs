@@ -56,7 +56,7 @@ namespace Reakt.Application.Tests.Unit
             //Arrange
             var expected = _mapper.Map<List<Domain.Models.Board>>(_mockData);
             //Act
-            var result = _boardService.Get();
+            var result = _boardService.GetAsync();
 
             //Arrange
             result.Should().BeEquivalentTo(expected);
@@ -67,7 +67,7 @@ namespace Reakt.Application.Tests.Unit
             //Arrange
             var expected = _mapper.Map<Domain.Models.Board>(_mockData.First(b => b.Id == 1));
             //Act
-            var result = _boardService.Get(1);
+            var result = _boardService.GetAsync(1);
 
             //Arrange            
             result.Should().BeEquivalentTo(expected);

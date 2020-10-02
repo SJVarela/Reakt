@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace Reakt.Application.Contracts.Interfaces
 {
-    public interface ICommentService : ICrudService<Comment>
+    public interface ICommentService : ICrudAsyncService<Comment>
     {
         void Like(long id);
-        Task<IEnumerable<Comment>> GetForPost(long postId);
-        Task<Comment> AddComment(long postId, Comment comment);
+        Task<IEnumerable<Comment>> GetForPostAsync(long postId);
+        Task<Comment> AddCommentAsync(long postId, Comment comment);
     }
 }
