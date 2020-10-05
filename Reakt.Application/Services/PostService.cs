@@ -6,8 +6,6 @@ using Reakt.Domain.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Reakt.Application.Services
@@ -15,6 +13,7 @@ namespace Reakt.Application.Services
     public class PostService : IPostService
     {
         private readonly IReaktDbContext _dbContext;
+
         private readonly IMapper _mapper;
 
         public PostService(IReaktDbContext dbContext, IMapper mapper)
@@ -28,7 +27,7 @@ namespace Reakt.Application.Services
         /// </summary>
         /// <param name="boardId"></param>
         /// <param name="entity">Post properties</param>
-        /// <returns>The created Post </returns>
+        /// <returns>The created Post</returns>
         public async Task<Post> CreateAsync(long boardId, Post entity)
         {
             var post = _mapper.Map<Persistence.Models.Post>(entity);
@@ -62,16 +61,6 @@ namespace Reakt.Application.Services
         }
 
         /// <summary>
-        /// Get all Posts for a given Board
-        /// </summary>
-        /// <param name="boardId"></param>
-        /// <returns>List of Posts in given Board</returns>
-        public async Task<IEnumerable<Post>> GetForBoardAsync(long boardId)
-        {
-            return _mapper.Map<IEnumerable<Post>>(await _dbContext.Posts.Where(x => x.BoardId == boardId).ToListAsync());
-        }
-
-        /// <summary>
         /// Get a Post by Id
         /// </summary>
         /// <param name="id"></param>
@@ -79,6 +68,16 @@ namespace Reakt.Application.Services
         public async Task<Post> GetAsync(long id)
         {
             return _mapper.Map<Post>(await _dbContext.Posts.FirstOrDefaultAsync(x => x.Id == id));
+        }
+
+        /// <summary>
+        /// Get all Posts for a given Board
+        /// </summary>
+        /// <param name="boardId"></param>
+        /// <returns>List of Posts in given Board</returns>
+        public async Task<IEnumerable<Post>> GetForBoardAsync(long boardId)
+        {
+            return _mapper.Map<IEnumerable<Post>>(await _dbContext.Posts.Where(x => x.BoardId == boardId).ToListAsync());
         }
 
         /// <summary>
@@ -98,6 +97,5 @@ namespace Reakt.Application.Services
 
             return _mapper.Map<Post>(newPost);
         }
-
     }
 }

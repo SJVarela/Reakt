@@ -1,18 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
 
 namespace Reakt.Server.MapperConfig
 {
     /// <summary>
-    /// 
     /// </summary>
     public class PostProfile : Profile
     {
         /// <summary>
-        /// 
         /// </summary>
         public PostProfile()
         {

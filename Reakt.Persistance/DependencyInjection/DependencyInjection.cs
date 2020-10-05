@@ -1,14 +1,12 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.EntityFrameworkCore;
-using Reakt.Persistance.DataAccess;
-using Reakt.Application.Persistence;
 using Microsoft.Extensions.Logging;
-using System;
+using Reakt.Application.Persistence;
+using Reakt.Persistance.DataAccess;
 
 namespace Reakt.Persistance.DependencyInjection
 {
-
     public static class DependencyInjection
     {
         //For testing and debugging
@@ -26,11 +24,10 @@ namespace Reakt.Persistance.DependencyInjection
             services.AddDbContext<ReaktDbContext>(options =>
                 options.UseSqlServer(configuration.GetConnectionString("ReaktDbConnection"))
                 .UseLoggerFactory(MyLoggerFactory));
-            
+
             services.AddScoped<IReaktDbContext>(provider => provider.GetService<ReaktDbContext>());
 
             return services;
         }
-
     }
 }

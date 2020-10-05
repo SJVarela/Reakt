@@ -1,32 +1,20 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AutoMapper;
-using Castle.Core.Logging;
+﻿using AutoMapper;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure.Internal;
-using Moq;
 using NUnit.Framework;
-using NUnit.Framework.Constraints;
-using Reakt.Application.Persistence;
 using Reakt.Application.Persistence.Models;
 using Reakt.Application.Services;
 using Reakt.Persistance.DataAccess;
 using Reakt.Server.MapperConfig;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Reakt.Application.Tests.Unit
 {
     [TestFixture]
-    class BoardServiceTests
+    internal class BoardServiceTests
     {
-        private ReaktDbContext _context;
-        private IMapper _mapper;
-        private BoardService _boardService;
-
         private readonly List<Board> _mockData = new List<Board>()
         {
             new Board()
@@ -36,19 +24,23 @@ namespace Reakt.Application.Tests.Unit
                 Description = "Test desc"
             }
         };
-        
-        [OneTimeSetUp]
-        public void Setup()
-        {
-            //setup inmemorydb
-            var x = new DbContextOptionsBuilder<ReaktDbContext>();
-            x.UseInMemoryDatabase("UtDb");
-            _context = new ReaktDbContext(x.Options);
-            _context.Boards.AddRange(_mockData);
-            _context.SaveChanges();
 
-            _mapper = new Mapper(new MapperConfiguration(conf => conf.AddProfile(new BoardProfile())));
-            _boardService = new BoardService(_context, _mapper);
+        private BoardService _boardService;
+
+        private ReaktDbContext _context;
+
+        private IMapper _mapper;
+
+        [Test]
+        public async Task Get_by_Id_Should_Return_Results()
+        {
+            //Arrange
+            var expected = _mapper.Map<Domain.Models.Board>(_mockData.First(b => b.Id == 1));
+            //Act
+            var result = await _boardService.GetAsync(1);
+
+            //Arrange
+            result.Should().BeEquivalentTo(expected);
         }
 
         [Test]
@@ -62,17 +54,19 @@ namespace Reakt.Application.Tests.Unit
             //Arrange
             result.Should().BeEquivalentTo(expected);
         }
-        [Test]
-        public async Task Get_by_Id_Should_Return_Results()
-        {
-            //Arrange
-            var expected = _mapper.Map<Domain.Models.Board>(_mockData.First(b => b.Id == 1));
-            //Act
-            var result = await _boardService.GetAsync(1);
 
-            //Arrange            
-            result.Should().BeEquivalentTo(expected);
+        [OneTimeSetUp]
+        public void Setup()
+        {
+            //setup inmemorydb
+            var x = new DbContextOptionsBuilder<ReaktDbContext>();
+            x.UseInMemoryDatabase("UtDb");
+            _context = new ReaktDbContext(x.Options);
+            _context.Boards.AddRange(_mockData);
+            _context.SaveChanges();
+
+            _mapper = new Mapper(new MapperConfiguration(conf => conf.AddProfile(new BoardProfile())));
+            _boardService = new BoardService(_context, _mapper);
         }
     }
 }
-

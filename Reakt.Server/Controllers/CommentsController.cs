@@ -7,8 +7,6 @@ using Reakt.Application.Contracts.Interfaces;
 using Reakt.Server.Models;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.Metadata.Ecma335;
 using System.Threading.Tasks;
 
 namespace Reakt.Server.Controllers
@@ -20,9 +18,10 @@ namespace Reakt.Server.Controllers
     [ApiController]
     public class CommentsController : ControllerBase
     {
-        private readonly ILogger _logger;
         private readonly ICommentService _commentService;
+        private readonly ILogger _logger;
         private readonly IMapper _mapper;
+
         /// <summary>
         /// Default constructor
         /// </summary>
@@ -34,6 +33,29 @@ namespace Reakt.Server.Controllers
             _logger = logger;
             _commentService = commentService;
             _mapper = mapper;
+        }
+
+        /// <summary>
+        /// Adds a comment to a post
+        /// </summary>
+        /// <param name="postId">Post identifier</param>
+        /// <param name="commentDto">Comment model</param>
+        /// <returns>The created comment</returns>
+        [HttpPost("posts/{postId}/comments")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<Comment>> AddAsync(long postId, [FromBody] Comment commentDto)
+        {
+            try
+            {
+                var comment = _mapper.Map<Domain.Models.Comment>(commentDto);
+                return Ok(_mapper.Map<Comment>(await _commentService.AddCommentAsync(postId, comment)));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
         }
 
         /// <summary>
@@ -63,7 +85,7 @@ namespace Reakt.Server.Controllers
         //TODO: We should add pagination
         /// <summary>
         /// Gets all the comments for a posts
-        /// </summary>        
+        /// </summary>
         /// <param name="postId">Post identifier</param>
         /// <param name="startRange">Starting item position</param>
         /// <param name="endRange">Ending item position</param>
@@ -79,29 +101,6 @@ namespace Reakt.Server.Controllers
             {
                 var result = await _commentService.GetForPostAsync(postId, startRange, endRange);
                 return Ok(_mapper.Map<IEnumerable<Comment>>(result));
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, ex.Message);                
-                return StatusCode(StatusCodes.Status500InternalServerError);
-            }
-        }
-
-        /// <summary>
-        /// Adds a comment to a post
-        /// </summary>
-        /// <param name="postId">Post identifier</param>
-        /// <param name="commentDto">Comment model</param>
-        /// <returns>The created comment</returns>
-        [HttpPost("posts/{postId}/comments")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<Comment>> AddAsync(long postId, [FromBody] Comment commentDto)
-        {
-            try
-            {
-                var comment = _mapper.Map<Domain.Models.Comment>(commentDto);
-                return Ok(_mapper.Map<Comment>(await _commentService.AddCommentAsync(postId, comment)));
             }
             catch (Exception ex)
             {

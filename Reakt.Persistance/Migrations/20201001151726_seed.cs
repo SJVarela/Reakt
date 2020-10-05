@@ -1,10 +1,71 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+using System;
 
 namespace Reakt.Persistance.Migrations
 {
     public partial class seed : Migration
     {
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropForeignKey(
+                name: "FK_Comments_Posts_PostId",
+                table: "Comments");
+
+            migrationBuilder.DropForeignKey(
+                name: "FK_Posts_Boards_BoardId",
+                table: "Posts");
+
+            migrationBuilder.DeleteData(
+                table: "Comments",
+                keyColumn: "Id",
+                keyValue: 2L);
+
+            migrationBuilder.DeleteData(
+                table: "Comments",
+                keyColumn: "Id",
+                keyValue: 1L);
+
+            migrationBuilder.DeleteData(
+                table: "Posts",
+                keyColumn: "Id",
+                keyValue: 1L);
+
+            migrationBuilder.DeleteData(
+                table: "Boards",
+                keyColumn: "Id",
+                keyValue: 1L);
+
+            migrationBuilder.AlterColumn<long>(
+                name: "BoardId",
+                table: "Posts",
+                type: "bigint",
+                nullable: true,
+                oldClrType: typeof(long));
+
+            migrationBuilder.AlterColumn<long>(
+                name: "PostId",
+                table: "Comments",
+                type: "bigint",
+                nullable: true,
+                oldClrType: typeof(long));
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Comments_Posts_PostId",
+                table: "Comments",
+                column: "PostId",
+                principalTable: "Posts",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Restrict);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Posts_Boards_BoardId",
+                table: "Posts",
+                column: "BoardId",
+                principalTable: "Boards",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Restrict);
+        }
+
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
@@ -66,67 +127,6 @@ namespace Reakt.Persistance.Migrations
                 principalTable: "Boards",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Cascade);
-        }
-
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.DropForeignKey(
-                name: "FK_Comments_Posts_PostId",
-                table: "Comments");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_Posts_Boards_BoardId",
-                table: "Posts");
-
-            migrationBuilder.DeleteData(
-                table: "Comments",
-                keyColumn: "Id",
-                keyValue: 2L);
-
-            migrationBuilder.DeleteData(
-                table: "Comments",
-                keyColumn: "Id",
-                keyValue: 1L);
-
-            migrationBuilder.DeleteData(
-                table: "Posts",
-                keyColumn: "Id",
-                keyValue: 1L);
-
-            migrationBuilder.DeleteData(
-                table: "Boards",
-                keyColumn: "Id",
-                keyValue: 1L);
-
-            migrationBuilder.AlterColumn<long>(
-                name: "BoardId",
-                table: "Posts",
-                type: "bigint",
-                nullable: true,
-                oldClrType: typeof(long));
-
-            migrationBuilder.AlterColumn<long>(
-                name: "PostId",
-                table: "Comments",
-                type: "bigint",
-                nullable: true,
-                oldClrType: typeof(long));
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_Comments_Posts_PostId",
-                table: "Comments",
-                column: "PostId",
-                principalTable: "Posts",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Restrict);
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_Posts_Boards_BoardId",
-                table: "Posts",
-                column: "BoardId",
-                principalTable: "Boards",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Restrict);
         }
     }
 }

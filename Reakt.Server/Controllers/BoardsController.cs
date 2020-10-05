@@ -6,13 +6,11 @@ using Reakt.Application.Contracts.Interfaces;
 using Reakt.Server.Models;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Reakt.Server.Controllers
 {
     /// <summary>
-    /// 
     /// </summary>
     [Route("api/[controller]")]
     [ApiController]
@@ -21,6 +19,7 @@ namespace Reakt.Server.Controllers
         private readonly IBoardService _boardService;
         private readonly ILogger _logger;
         private readonly IMapper _mapper;
+
         /// <summary>
         /// Default constructor
         /// </summary>
@@ -33,8 +32,8 @@ namespace Reakt.Server.Controllers
             _logger = logger;
             _mapper = mapper;
         }
+
         /// <summary>
-        /// 
         /// </summary>
         /// <returns></returns>
         [HttpGet]

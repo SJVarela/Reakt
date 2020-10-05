@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Reakt.Server.Models
+﻿namespace Reakt.Server.Models
 {
     /// <summary>
     /// Base tracked entity

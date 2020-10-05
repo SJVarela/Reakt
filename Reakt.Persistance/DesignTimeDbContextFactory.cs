@@ -9,21 +9,12 @@ namespace Reakt.Persistance
     public abstract class DesignTimeDbContextFactory<TContext> :
         IDesignTimeDbContextFactory<TContext> where TContext : DbContext
     {
-        private const string ConnectionStringName = "ReaktDbConnection";
         private const string AspNetCoreEnvironment = "ASPNETCORE_ENVIRONMENT";
-
-        public TContext CreateDbContext(string[] args)
-        {
-            var basePath = Directory.GetCurrentDirectory() + string.Format("{0}..{0}Reakt.Server", Path.DirectorySeparatorChar);
-            return Create(basePath, Environment.GetEnvironmentVariable(AspNetCoreEnvironment));
-        }
-
-        protected abstract TContext CreateNewInstance(DbContextOptions<TContext> options);
+        private const string ConnectionStringName = "ReaktDbConnection";
 
         private TContext Create(string basePath, string environmentName)
         {
-
-            var configuration = new ConfigurationBuilder()                
+            var configuration = new ConfigurationBuilder()
                 .SetBasePath(basePath)
                 .AddJsonFile("appsettings.json")
                 .AddJsonFile($"appsettings.Local.json", optional: true)
@@ -50,6 +41,14 @@ namespace Reakt.Persistance
             optionsBuilder.UseSqlServer(connectionString);
 
             return CreateNewInstance(optionsBuilder.Options);
+        }
+
+        protected abstract TContext CreateNewInstance(DbContextOptions<TContext> options);
+
+        public TContext CreateDbContext(string[] args)
+        {
+            var basePath = Directory.GetCurrentDirectory() + string.Format("{0}..{0}Reakt.Server", Path.DirectorySeparatorChar);
+            return Create(basePath, Environment.GetEnvironmentVariable(AspNetCoreEnvironment));
         }
     }
 }
