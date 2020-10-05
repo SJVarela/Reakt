@@ -234,8 +234,8 @@ namespace Reakt.Application.Tests.Unit
             _context.Boards.AddRange(_boardData);
             _context.SaveChanges();
           
-            //Arrange
-            result.Should().BeEquivalentTo(expected);
+            _mapper = new Mapper(new MapperConfiguration(conf => conf.AddProfile(new PostProfile())));
+            _postService = new PostService(_context, _mapper);
         }
 
         [Test]
