@@ -1,9 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Reakt.Application.Persistence.Models;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Reakt.Persistance.Configurations
 {

@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Reakt.Server.Models
 {
@@ -12,17 +9,19 @@ namespace Reakt.Server.Models
     public class Post : AuditableEntity
     {
         /// <summary>
-        /// Post title
+        /// Post comments
         /// </summary>
-        [Required]
-        public string Title { get; set; }
+        public List<Comment> Comments { get; set; }
+
         /// <summary>
         /// Post description
         /// </summary>
         public string Description { get; set; }
+
         /// <summary>
-        /// Post comments
+        /// Post title
         /// </summary>
-        public List<Comment> Comments { get; set; }
+        [Required]
+        public string Title { get; set; }
     }
 }

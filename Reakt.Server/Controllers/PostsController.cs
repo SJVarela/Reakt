@@ -7,7 +7,6 @@ using Reakt.Application.Contracts.Interfaces;
 using Reakt.Server.Models;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Reakt.Server.Controllers
@@ -16,15 +15,32 @@ namespace Reakt.Server.Controllers
     [ApiController]
     public class PostsController : ControllerBase
     {
-        private readonly IPostService _postService;
         private readonly ILogger _logger;
         private readonly IMapper _mapper;
+        private readonly IPostService _postService;
 
         public PostsController(IPostService postService, ILogger<BoardsController> logger, IMapper mapper)
         {
             _postService = postService;
             _logger = logger;
             _mapper = mapper;
+        }
+
+        [HttpPost("boards/{boardId}/posts")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public ActionResult<Post> Create(long boardId, [FromBody] Post postDto)
+        {
+            try
+            {
+                var post = _mapper.Map<Domain.Models.Post>(postDto);
+                post.BoardId = boardId;
+                return Ok(_mapper.Map<Post>(_postService.CreateAsync(post)));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
         }
 
         [Route("posts")]
@@ -35,22 +51,6 @@ namespace Reakt.Server.Controllers
             try
             {
                 return Ok(_mapper.Map<IEnumerable<Post>>(_postService.GetAsync()));
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, ex.Message);
-                return StatusCode(StatusCodes.Status500InternalServerError);
-            }
-        }
-
-        [Route("boards/{boardId}/posts")]
-        [HttpGet]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<IEnumerable<Post>>> GetForBoard(long boardId)
-        {
-            try
-            {
-                return Ok(_mapper.Map<IEnumerable<Post>>(await _postService.GetForBoardAsync(boardId)));
             }
             catch (Exception ex)
             {
@@ -75,15 +75,14 @@ namespace Reakt.Server.Controllers
             }
         }
 
-        [HttpPost("boards/{boardId}/posts")]
+        [Route("boards/{boardId}/posts")]
+        [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public ActionResult<Post> Create(long boardId, [FromBody] Post postDto)
+        public async Task<ActionResult<IEnumerable<Post>>> GetForBoard(long boardId)
         {
             try
             {
-                var post = _mapper.Map<Domain.Models.Post>(postDto);
-                post.BoardId = boardId;
-                return Ok(_mapper.Map<Post>(_postService.CreateAsync(post)));
+                return Ok(_mapper.Map<IEnumerable<Post>>(await _postService.GetForBoardAsync(boardId)));
             }
             catch (Exception ex)
             {
@@ -109,6 +108,5 @@ namespace Reakt.Server.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
-
     }
 }

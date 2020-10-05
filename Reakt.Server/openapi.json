@@ -277,7 +277,7 @@
             "nullable": true
           }
         },
-        "additionalProperties": { }
+        "additionalProperties": {}
       },
       "WeatherForecast": {
         "type": "object",

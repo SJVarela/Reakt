@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Reakt.Application.Persistence.Models;
 
-
 namespace Reakt.Persistance.Configurations
 {
     public class CommentsConfiguration : IEntityTypeConfiguration<Comment>
@@ -12,7 +11,7 @@ namespace Reakt.Persistance.Configurations
             builder.Property(e => e.Id)
                 .UseIdentityColumn();
             builder.Property(e => e.Message)
-                .IsRequired()                
+                .IsRequired()
                 .HasMaxLength(4000);
         }
     }
