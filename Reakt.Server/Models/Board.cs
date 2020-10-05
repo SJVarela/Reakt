@@ -8,7 +8,7 @@ namespace Reakt.Server.Models
     /// <summary>
     /// A Reaktive message board
     /// </summary>
-    public class Board
+    public class Board : AuditableEntity
     {
         /// <summary>
         /// Board Title
