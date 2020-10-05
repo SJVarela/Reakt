@@ -16,6 +16,7 @@ namespace Reakt.Application.Services
     public class PostService : IPostService
     {
         private readonly IReaktDbContext _dbContext;
+
         private readonly IMapper _mapper;
 
         public PostService(IReaktDbContext dbContext, IMapper mapper)

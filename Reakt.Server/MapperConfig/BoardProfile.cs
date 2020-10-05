@@ -1,18 +1,12 @@
 ﻿using AutoMapper;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Reakt.Server.MapperConfig
 {
     /// <summary>
-    /// 
     /// </summary>
     public class BoardProfile : Profile
     {
         /// <summary>
-        /// 
         /// </summary>
         public BoardProfile()
         {

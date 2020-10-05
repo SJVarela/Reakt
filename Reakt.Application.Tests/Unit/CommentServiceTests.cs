@@ -13,19 +13,19 @@ using System.Threading.Tasks;
 namespace Reakt.Application.Tests.Unit
 {
     [TestFixture]
-    internal class BoardServiceTests
+    internal class CommentServiceTests
     {
-        private readonly List<Board> _mockData = new List<Board>()
+        private readonly List<Comment> _mockData = new List<Comment>()
         {
-            new Board()
+            new Comment()
             {
                 Id = 1,
-                Title = "Test title",
-                Description = "Test desc"
+                Message = "Test message",
+                PostId = 1,
             }
         };
 
-        private BoardService _boardService;
+        private CommentService _commentService;
 
         private ReaktDbContext _context;
 
@@ -35,9 +35,9 @@ namespace Reakt.Application.Tests.Unit
         public async Task Get_by_Id_Should_Return_Results()
         {
             //Arrange
-            var expected = _mapper.Map<Domain.Models.Board>(_mockData.First(b => b.Id == 1));
+            var expected = _mapper.Map<Domain.Models.Comment>(_mockData.First(b => b.Id == 1));
             //Act
-            var result = await _boardService.GetAsync(1);
+            var result = await _commentService.GetAsync(1);
 
             //Arrange
             result.Should().BeEquivalentTo(expected);
@@ -47,9 +47,9 @@ namespace Reakt.Application.Tests.Unit
         public async Task Get_Should_Return_Results()
         {
             //Arrange
-            var expected = _mapper.Map<List<Domain.Models.Board>>(_mockData);
+            var expected = _mapper.Map<List<Domain.Models.Comment>>(_mockData);
             //Act
-            var result = await _boardService.GetAsync();
+            var result = await _commentService.GetAsync();
 
             //Arrange
             result.Should().BeEquivalentTo(expected);
@@ -62,11 +62,11 @@ namespace Reakt.Application.Tests.Unit
             var x = new DbContextOptionsBuilder<ReaktDbContext>();
             x.UseInMemoryDatabase("UtDb");
             _context = new ReaktDbContext(x.Options);
-            _context.Boards.AddRange(_mockData);
+            _context.Comments.AddRange(_mockData);
             _context.SaveChanges();
 
-            _mapper = new Mapper(new MapperConfiguration(conf => conf.AddProfile(new BoardProfile())));
-            _boardService = new BoardService(_context, _mapper);
+            _mapper = new Mapper(new MapperConfiguration(conf => conf.AddProfile(new CommentProfile())));
+            _commentService = new CommentService(_context, _mapper);
         }
     }
 }

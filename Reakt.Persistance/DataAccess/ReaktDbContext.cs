@@ -1,11 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Console;
 using Reakt.Application.Persistence;
 using Reakt.Application.Persistence.Models;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -13,13 +9,29 @@ namespace Reakt.Persistance.DataAccess
 {
     public class ReaktDbContext : DbContext, IReaktDbContext
     {
-        public ReaktDbContext(DbContextOptions<ReaktDbContext> options) : base(options)
+        private void UpdateAuditableState()
         {
-        }
+            foreach (var entry in ChangeTracker.Entries<AuditableEntity>())
+            {
+                switch (entry.State)
+                {
+                    case EntityState.Added:
+                        entry.Entity.CreatedAt = DateTime.Now;
+                        entry.Entity.Active = true;
+                        break;
 
-        public DbSet<Comment> Comments { get; set; }
-        public DbSet<Post> Posts { get; set; }
-        public DbSet<Board> Boards { get; set; }
+                    case EntityState.Modified:
+                        entry.Entity.UpdatedAt = DateTime.Now;
+                        break;
+
+                    case EntityState.Deleted:
+                        entry.Entity.DeletedAt = DateTime.Now;
+                        entry.Entity.Active = false;
+                        entry.State = EntityState.Modified;
+                        break;
+                }
+            }
+        }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -32,11 +44,13 @@ namespace Reakt.Persistance.DataAccess
             DbSeeder.SeedDb(modelBuilder);
         }
 
-        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
+        public ReaktDbContext(DbContextOptions<ReaktDbContext> options) : base(options)
         {
-            UpdateAuditableState();
-            return base.SaveChangesAsync(cancellationToken);
         }
+
+        public DbSet<Board> Boards { get; set; }
+        public DbSet<Comment> Comments { get; set; }
+        public DbSet<Post> Posts { get; set; }
 
         public override int SaveChanges()
         {
@@ -44,28 +58,10 @@ namespace Reakt.Persistance.DataAccess
             return base.SaveChanges();
         }
 
-        private void UpdateAuditableState()
+        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
         {
-            foreach (var entry in ChangeTracker.Entries<AuditableEntity>())
-            {
-                switch (entry.State)
-                {
-                    case EntityState.Added:
-                        entry.Entity.CreatedAt = DateTime.Now;
-                        entry.Entity.Active = true;
-                        break;
-                    case EntityState.Modified:
-                        entry.Entity.UpdatedAt = DateTime.Now;
-                        break;
-                    case EntityState.Deleted:
-                        entry.Entity.DeletedAt = DateTime.Now;
-                        entry.Entity.Active = false;
-                        entry.State = EntityState.Modified;
-                        break;
-                }
-            }
+            UpdateAuditableState();
+            return base.SaveChangesAsync(cancellationToken);
         }
-
-      
     }
 }

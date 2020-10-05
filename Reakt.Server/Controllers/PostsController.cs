@@ -49,6 +49,7 @@ namespace Reakt.Server.Controllers
             {
                 var post = _mapper.Map<Domain.Models.Post>(postDto);
                 return Ok(_mapper.Map<Post>(await _postService.AddAsync(boardId, post)));
+
             }
             catch (Exception ex)
             {

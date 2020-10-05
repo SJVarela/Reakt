@@ -1,8 +1,7 @@
-﻿namespace Reakt.Application.Persistence
+﻿namespace Reakt.Domain.Models
 {
     public abstract class BaseEntity
     {
-        public bool Active { get; set; }
         public long Id { get; set; }
     }
 }

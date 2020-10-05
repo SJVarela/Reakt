@@ -1,22 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Reakt.Server.Models
 {
     /// <summary>
     /// A Reaktive board post
     /// </summary>
-    public class Post
+    public class Post : AuditableEntity
     {
         /// <summary>
-        /// Post identifier
-        /// </summary>
-        public long Id { get; private set; }
-        /// <summary>
-        /// Post title
+        /// Post Title
         /// </summary>
         [Required]
         [MaxLength(100)]
@@ -28,7 +21,6 @@ namespace Reakt.Server.Models
         [MaxLength(4000)]
         [MinLength(1)]
         public string Description { get; set; }
-        /// <summary>
         /// Date the post was created
         /// </summary>
         public DateTime CreatedAt { get; private set; }
@@ -44,5 +36,6 @@ namespace Reakt.Server.Models
         /// Post comments
         /// </summary>
         public List<Comment> Comments { get; set; }
+       
     }
 }

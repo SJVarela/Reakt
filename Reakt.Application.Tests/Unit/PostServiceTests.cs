@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
@@ -233,9 +233,9 @@ namespace Reakt.Application.Tests.Unit
             _context.Posts.AddRange(_postData);
             _context.Boards.AddRange(_boardData);
             _context.SaveChanges();
-
-            _mapper = new Mapper(new MapperConfiguration(conf => conf.AddProfile(new PostProfile())));
-            _postService = new PostService(_context, _mapper);
+          
+            //Arrange
+            result.Should().BeEquivalentTo(expected);
         }
 
         [Test]

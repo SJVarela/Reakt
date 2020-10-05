@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace Reakt.Application.Persistence
+namespace Reakt.Domain.Models
 {
-    public abstract class AuditableEntity : BaseEntity
+    public class AuditableEntity : BaseEntity
     {
         public DateTime CreatedAt { get; set; }
         public DateTime? DeletedAt { get; set; }

@@ -1,10 +1,22 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+using System;
 
 namespace Reakt.Persistance.Migrations
 {
     public partial class auditable : Migration
     {
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropTable(
+                name: "Comments");
+
+            migrationBuilder.DropTable(
+                name: "Posts");
+
+            migrationBuilder.DropTable(
+                name: "Boards");
+        }
+
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
@@ -96,18 +108,6 @@ namespace Reakt.Persistance.Migrations
                 name: "IX_Posts_BoardId",
                 table: "Posts",
                 column: "BoardId");
-        }
-
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.DropTable(
-                name: "Comments");
-
-            migrationBuilder.DropTable(
-                name: "Posts");
-
-            migrationBuilder.DropTable(
-                name: "Boards");
         }
     }
 }
