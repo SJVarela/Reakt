@@ -16,45 +16,25 @@ namespace Reakt.Application.Services
     {
         private readonly IReaktDbContext _dbContext;
         private readonly IMapper _mapper;
-
         public CommentService(IReaktDbContext dbContext, IMapper mapper)
         {
             _dbContext = dbContext;
             _mapper = mapper;
         }
 
-        public async Task<Comment> AddComment(long postId, Comment comment)
+        public async Task<IEnumerable<Comment>> GetAsync()
         {
-            Persistence.Models.Comment storedComment = _mapper.Map<Persistence.Models.Comment>(comment);
-            storedComment.PostId = postId;
-            storedComment = _dbContext.Comments.Add(storedComment).Entity;
-            await _dbContext.SaveChangesAsync();
-            return _mapper.Map<Comment>(storedComment);
-        }
-
-        public Comment Create(Comment enity)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Delete(long id)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Comment Get(long id)
-        {
-            var result = _dbContext.Comments.Where(x => x.Id == id).FirstOrDefault();
-            return _mapper.Map<Comment>(result);
-        }
-
-        public async Task<IEnumerable<Comment>> Get()
-        {            
             return _mapper.Map<IEnumerable<Comment>>(
                 await _dbContext.Comments.ToListAsync());
         }
 
-        public async Task<IEnumerable<Comment>> GetForPost(long postId)
+        public async Task<Comment> GetAsync(long id)
+        {
+            var result = await _dbContext.Comments.FirstOrDefaultAsync(c => c.Id == id);
+            return _mapper.Map<Comment>(result);
+        }
+
+        public async Task<IEnumerable<Comment>> GetForPostAsync(long postId)
         {
             return _mapper.Map<IEnumerable<Comment>>(
                 await _dbContext.Comments.Where(c => c.PostId == postId)
@@ -62,19 +42,37 @@ namespace Reakt.Application.Services
                                          .ToListAsync());
         }
 
+        public async Task<Comment> AddCommentAsync(long postId, Comment comment)
+        {
+            var storedComment = _mapper.Map<Persistence.Models.Comment>(comment);
+            storedComment.PostId = postId;
+            storedComment = _dbContext.Comments.Add(storedComment).Entity;
+            await _dbContext.SaveChangesAsync();
+            return _mapper.Map<Comment>(storedComment);
+        }
+
+        public void Delete(long id)
+        {
+            throw new NotImplementedException();
+        }
         public void Like(long id)
         {
             throw new NotImplementedException();
         }
 
-        public Comment Update(Comment enity)
+        public Task<Comment> CreateAsync(Comment entity)
         {
             throw new NotImplementedException();
         }
 
-        IEnumerable<Comment> ICrudService<Comment>.Get()
+        public async Task<Comment> UpdateAsync(Comment entity)
         {
-            throw new NotImplementedException();
+            var comment = await _dbContext.Comments.FirstOrDefaultAsync(c => c.Id == entity.Id);
+            _mapper.Map(entity, comment);
+
+            var storedComment = _dbContext.Comments.Update(comment).Entity;
+            await _dbContext.SaveChangesAsync();
+            return _mapper.Map<Comment>(storedComment);
         }
     }
 }

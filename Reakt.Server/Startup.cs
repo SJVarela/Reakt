@@ -2,7 +2,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.NewtonsoftJson;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -14,28 +14,44 @@ using Reakt.Persistance.DataAccess;
 using Reakt.Persistance.DependencyInjection;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace Reakt.Server
 {
+    /// <summary>
+    /// Class to for server bootstrapping
+    /// </summary>
     public class Startup
     {
+        /// <summary>
+        /// Default constructor
+        /// </summary>
+        /// <param name="configuration"></param>
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
+        /// <summary>
+        /// This method gets called by the runtime. Use this method to add services to the container.
+        /// </summary>
+        /// <param name="services"></param>
         public void ConfigureServices(IServiceCollection services)
         {
 
             services.AddLogging(conf => conf.AddConsole());
             services.AddPersistence(Configuration);
             services.AddAutoMapper(typeof(Startup));
-            services.AddControllers();
+
+            services.AddControllers()
+                .AddNewtonsoftJson();
             //For testing!
             services.AddCors(opt => opt.AddDefaultPolicy(builder => builder.AllowAnyOrigin()));
             /*
@@ -54,11 +70,22 @@ namespace Reakt.Server
             //DI services
             services.AddScoped<ICommentService, CommentService>();
             services.AddScoped<IBoardService, BoardService>();
+            services.AddScoped<IPostService, PostService>();
 
-            services.AddSwaggerGen(c => c.SwaggerDoc("v1", new OpenApiInfo() { Title = "Reakt API" }));
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo() { Title = "Reakt API", Version = "v1" });
+                // Set the comments path for the Swagger JSON and UI.
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                c.IncludeXmlComments(xmlPath);
+            });
         }
-
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        /// <summary>
+        /// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        /// </summary>
+        /// <param name="app"></param>
+        /// <param name="env"></param>        
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
@@ -68,7 +95,7 @@ namespace Reakt.Server
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Reakt API v1");
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Reakt API");
             });
             app.UseHttpsRedirection();
             //For testing only

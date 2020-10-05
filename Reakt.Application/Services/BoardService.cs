@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using Reakt.Application.Contracts.Interfaces;
 using Reakt.Application.Persistence;
 using Reakt.Domain.Models;
@@ -6,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Reakt.Application.Services
 {
@@ -20,7 +22,7 @@ namespace Reakt.Application.Services
             _mapper = mapper;
         }
 
-        public Board Create(Board enity)
+        public Task<Board> CreateAsync(Board enity)
         {
             throw new NotImplementedException();
         }
@@ -30,17 +32,22 @@ namespace Reakt.Application.Services
             throw new NotImplementedException();
         }
 
-        public IEnumerable<Board> Get()
+        public async Task<IEnumerable<Board>> GetAsync()
         {
-            return _mapper.Map<IEnumerable<Board>>(_dbContext.Boards.ToList());
+            return _mapper.Map<IEnumerable<Board>>(await _dbContext.Boards.ToListAsync());
         }
 
-        public Board Get(long id)
+        public async Task<Board> GetAsync(long id)
         {
-            return _mapper.Map<Board>(_dbContext.Boards.FirstOrDefault(b => b.Id == id));
+            return _mapper.Map<Board>(await _dbContext.Boards.FirstOrDefaultAsync(b => b.Id == id));
         }
 
-        public Board Update(Board enity)
+        public Board UpdateAsync(Board enity)
+        {
+            throw new NotImplementedException();
+        }
+
+        Task<Board> ICrudAsyncService<Board>.UpdateAsync(Board enity)
         {
             throw new NotImplementedException();
         }
