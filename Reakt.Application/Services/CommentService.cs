@@ -34,11 +34,13 @@ namespace Reakt.Application.Services
             return _mapper.Map<Comment>(result);
         }
 
-        public async Task<IEnumerable<Comment>> GetForPostAsync(long postId)
+        public async Task<IEnumerable<Comment>> GetForPostAsync(long postId, int startRange, int endRange)
         {
             return _mapper.Map<IEnumerable<Comment>>(
                 await _dbContext.Comments.Where(c => c.PostId == postId)
-                                         .OrderByDescending(c => c.CreatedAt)
+                                         .OrderByDescending(c => c.CreatedAt)                                         
+                                         .Skip(startRange)
+                                         .Take(endRange - startRange)
                                          .ToListAsync());
         }
 

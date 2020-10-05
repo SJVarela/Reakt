@@ -65,20 +65,24 @@ namespace Reakt.Server.Controllers
         /// Gets all the comments for a posts
         /// </summary>        
         /// <param name="postId">Post identifier</param>
+        /// <param name="startRange">Starting item position</param>
+        /// <param name="endRange">Ending item position</param>
         /// <returns>List of comments</returns>
         [HttpGet("posts/{postId}/comments")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<IEnumerable<Comment>>> GetForPostAsync([FromRoute] long postId)
+        public async Task<ActionResult<IEnumerable<Comment>>> GetForPostAsync([FromRoute] long postId, int startRange = 0, int endRange = 50)
         {
+            if (startRange >= endRange)
+                return BadRequest();
             try
             {
-                var result = await _commentService.GetForPostAsync(postId);
+                var result = await _commentService.GetForPostAsync(postId, startRange, endRange);
                 return Ok(_mapper.Map<IEnumerable<Comment>>(result));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, ex.Message);
+                _logger.LogError(ex, ex.Message);                
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
@@ -115,15 +119,15 @@ namespace Reakt.Server.Controllers
         [HttpPatch("comments/{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<Comment>> UpdateAsync(long id, [FromBody] JsonPatchDocument<Comment> patchDocument)
+        public async Task<ActionResult<Comment>> UpdateAsync(long id, [FromBody] JsonPatchDocument patchDocument)
         {
             try
             {
-                var comment = _mapper.Map<Comment>(await _commentService.GetAsync(id));
+                var comment = await _commentService.GetAsync(id);
                 if (comment == null)
                     return NotFound();
                 patchDocument.ApplyTo(comment);
-                var updatedComment = await _commentService.UpdateAsync(_mapper.Map<Domain.Models.Comment>(comment));
+                var updatedComment = await _commentService.UpdateAsync(comment);
                 return Ok(_mapper.Map<Comment>(updatedComment));
             }
             catch (Exception ex)

@@ -4,9 +4,8 @@ using System.Text;
 
 namespace Reakt.Domain.Models
 {
-    public class Post
+    public class Post : AuditableEntity
     {
-        public long Id { get; private set; }
         public string Title { get; set; }
         public string Description { get; set; }
         public long BoardId { get; set; }
