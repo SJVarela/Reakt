@@ -127,15 +127,15 @@ namespace Reakt.Server.Controllers
         [HttpPatch("posts/{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<Post>> Update(long id, [FromBody] JsonPatchDocument<Post> patchDocument)
+        public async Task<ActionResult<Post>> Update(long id, [FromBody] JsonPatchDocument patchDocument)
         {
             try
             {
-               var post = _mapper.Map<Post>(await _postService.GetAsync(id));
+               var post = await _postService.GetAsync(id);
                if (post == null)
                     return NotFound();
                 patchDocument.ApplyTo(post);
-                var updatedPost = await _postService.UpdateAsync(_mapper.Map<Domain.Models.Post>(post));
+                var updatedPost = await _postService.UpdateAsync(post);
                 return Ok(_mapper.Map<Post>(updatedPost));
             }
             catch (Exception ex)
