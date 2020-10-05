@@ -7,24 +7,79 @@ using Reakt.Application.Contracts.Interfaces;
 using Reakt.Server.Models;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Reakt.Server.Controllers
 {
+    /// <summary>
+    /// The Posts controller
+    /// </summary>
     [Route("api")]
     [ApiController]
     public class PostsController : ControllerBase
     {
-        private readonly IPostService _postService;
         private readonly ILogger _logger;
         private readonly IMapper _mapper;
+        private readonly IPostService _postService;
 
+        /// <summary>
+        /// Default constructor
+        /// </summary>
+        /// <param name="postService">Injected Post service</param>
+        /// <param name="logger">Injected logger</param>
+        /// <param name="mapper">Injected mapper</param>
         public PostsController(IPostService postService, ILogger<PostsController> logger, IMapper mapper)
         {
             _postService = postService;
             _logger = logger;
             _mapper = mapper;
+        }
+
+        /// <summary>
+        /// Add a Post to a Board
+        /// </summary>
+        /// <param name="boardId">Board identfier</param>
+        /// <param name="postDto">Post model</param>
+        /// <returns>The created Post</returns>
+        [HttpPost("boards/{boardId}/posts")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<Post>> AddAsync(long boardId, [FromBody] Post postDto)
+        {
+            try
+            {
+                var post = _mapper.Map<Domain.Models.Post>(postDto);
+                return Ok(_mapper.Map<Post>(await _postService.AddAsync(boardId, post)));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+        }
+
+        /// <summary>
+        /// Delete a Post
+        /// </summary>
+        /// <param name="id">Post identifier</param>
+        /// <returns>Ok if Post was deleted</returns>
+        [HttpDelete("posts/{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<Post>> DeleteAsync(long id)
+        {
+            try
+            {
+                var post = await _postService.GetAsync(id);
+                if (post == null)
+                    return NotFound();
+                await _postService.DeleteAsync(id);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
         }
 
         /// <summary>
@@ -97,28 +152,6 @@ namespace Reakt.Server.Controllers
         }
 
         /// <summary>
-        /// Add a Post to a Board
-        /// </summary>
-        /// <param name="boardId">Board identfier</param>
-        /// <param name="postDto">Post model</param>
-        /// <returns>The created Post</returns>
-        [HttpPost("boards/{boardId}/posts")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<Post>> AddAsync(long boardId, [FromBody] Post postDto)
-        {
-            try
-            {
-                var post = _mapper.Map<Domain.Models.Post>(postDto);
-                return Ok(_mapper.Map<Post>(await _postService.AddAsync(boardId, post)));
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, ex.Message);
-                return StatusCode(StatusCodes.Status500InternalServerError);
-            }
-        }
-
-        /// <summary>
         /// Update a Post
         /// </summary>
         /// <param name="id">Post identifier</param>
@@ -131,8 +164,8 @@ namespace Reakt.Server.Controllers
         {
             try
             {
-               var post = await _postService.GetAsync(id);
-               if (post == null)
+                var post = await _postService.GetAsync(id);
+                if (post == null)
                     return NotFound();
                 patchDocument.ApplyTo(post);
                 var updatedPost = await _postService.UpdateAsync(post);
@@ -144,31 +177,5 @@ namespace Reakt.Server.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
-
-        /// <summary>
-        /// Delete a Post
-        /// </summary>
-        /// <param name="id">Post identifier</param>
-        /// <returns>Ok if Post was deleted</returns>
-        [HttpDelete("posts/{id}")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<Post>> DeleteAsync(long id)
-        {
-            try
-            {
-                var post = await _postService.GetAsync(id);
-                if (post == null)
-                    return NotFound();
-                await _postService.DeleteAsync(id);
-                return Ok();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, ex.Message);
-                return StatusCode(StatusCodes.Status500InternalServerError);
-            }
-        }
-
     }
 }
