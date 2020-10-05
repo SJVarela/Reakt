@@ -4,6 +4,9 @@ using System.Text;
 
 namespace Reakt.Server.Models
 {
+    /// <summary>
+    /// Base tracked entity
+    /// </summary>
     public abstract class BaseEntity
     {
         /// <summary>
