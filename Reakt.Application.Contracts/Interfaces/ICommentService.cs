@@ -9,7 +9,7 @@ namespace Reakt.Application.Contracts.Interfaces
     public interface ICommentService : ICrudAsyncService<Comment>
     {
         void Like(long id);
-        Task<IEnumerable<Comment>> GetForPostAsync(long postId);
+        Task<IEnumerable<Comment>> GetForPostAsync(long postId, int startRange, int endRange);
         Task<Comment> AddCommentAsync(long postId, Comment comment);
     }
 }
