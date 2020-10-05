@@ -39,11 +39,11 @@ namespace Reakt.Server.Controllers
         /// <returns></returns>
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public ActionResult<IEnumerable<Board>> GetAsync()
+        public async Task<ActionResult<IEnumerable<Board>>> GetAsync()
         {
             try
             {
-                return Ok(_mapper.Map<IEnumerable<Board>>(_boardService.GetAsync()));
+                return Ok(_mapper.Map<IEnumerable<Board>>(await _boardService.GetAsync()));
             }
             catch (Exception ex)
             {
