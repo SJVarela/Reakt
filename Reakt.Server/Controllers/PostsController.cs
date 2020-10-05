@@ -104,12 +104,12 @@ namespace Reakt.Server.Controllers
         /// <returns>The created Post</returns>
         [HttpPost("boards/{boardId}/posts")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public ActionResult<Post> AddAsync(long boardId, [FromBody] Post postDto)
+        public async Task<ActionResult<Post>> AddAsync(long boardId, [FromBody] Post postDto)
         {
             try
             {
                 var post = _mapper.Map<Domain.Models.Post>(postDto);
-                return Ok(_mapper.Map<Post>(_postService.AddAsync(boardId, post)));
+                return Ok(_mapper.Map<Post>(await _postService.AddAsync(boardId, post)));
             }
             catch (Exception ex)
             {
@@ -127,7 +127,7 @@ namespace Reakt.Server.Controllers
         [HttpPatch("posts/{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<Post>> Update(long id, [FromBody] JsonPatchDocument patchDocument)
+        public async Task<ActionResult<Post>> UpdateAsync(long id, [FromBody] JsonPatchDocument patchDocument)
         {
             try
             {
@@ -137,6 +137,31 @@ namespace Reakt.Server.Controllers
                 patchDocument.ApplyTo(post);
                 var updatedPost = await _postService.UpdateAsync(post);
                 return Ok(_mapper.Map<Post>(updatedPost));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+        }
+
+        /// <summary>
+        /// Delete a Post
+        /// </summary>
+        /// <param name="id">Post identifier</param>
+        /// <returns>Ok if Post was deleted</returns>
+        [HttpDelete("posts/{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<Post>> DeleteAsync(long id)
+        {
+            try
+            {
+                var post = await _postService.GetAsync(id);
+                if (post == null)
+                    return NotFound();
+                await _postService.DeleteAsync(id);
+                return Ok();
             }
             catch (Exception ex)
             {

@@ -20,6 +20,8 @@ namespace Reakt.Persistance.Configurations
             builder.Property(e => e.Description)
                 .IsRequired()
                 .HasMaxLength(600);
+
+            builder.HasQueryFilter(x => x.Active);
         }
     }
 }

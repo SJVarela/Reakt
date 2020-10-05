@@ -33,7 +33,7 @@ namespace Reakt.Application.Services
         {
             var post = _mapper.Map<Persistence.Models.Post>(entity);
             post.BoardId = boardId;
-            var result = await _dbContext.Posts.AddAsync(post);
+            var result = _dbContext.Posts.Add(post).Entity;
             await _dbContext.SaveChangesAsync();
 
             return _mapper.Map<Post>(result);
@@ -45,7 +45,7 @@ namespace Reakt.Application.Services
             throw new NotImplementedException();
         }
 
-        public async void DeleteAsync(long id)
+        public async Task DeleteAsync(long id)
         {
             var post = _dbContext.Posts.First(x => x.Id == id);
             _dbContext.Posts.Remove(post);
@@ -89,11 +89,9 @@ namespace Reakt.Application.Services
         public async Task<Post> UpdateAsync(Post entity)
         {
             var oldPost = await _dbContext.Posts.FindAsync(entity.Id);
-            oldPost.Title = entity.Title;
-            oldPost.Description = entity.Description;
-            oldPost.BoardId = entity.BoardId;
+            _mapper.Map(entity, oldPost);
 
-            var newPost = _dbContext.Posts.Update(oldPost);
+            var newPost = _dbContext.Posts.Update(oldPost).Entity;
             await _dbContext.SaveChangesAsync();
 
             return _mapper.Map<Post>(newPost);

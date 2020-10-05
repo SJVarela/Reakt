@@ -11,6 +11,6 @@ namespace Reakt.Application.Contracts.Interfaces
         Task<T> GetAsync(long id);
         Task<T> CreateAsync(T entity);
         Task<T> UpdateAsync(T entity);
-        void DeleteAsync(long id);
+        Task DeleteAsync(long id);
     }
 }
