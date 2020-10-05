@@ -115,11 +115,11 @@ namespace Reakt.Server.Controllers
         [HttpPatch("comments/{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<Comment>> UpdateAsync(long id, [FromBody] JsonPatchDocument<Comment> patchDocument)
+        public async Task<ActionResult<Comment>> UpdateAsync(long id, [FromBody] JsonPatchDocument patchDocument)
         {
             try
             {
-                var comment = _mapper.Map<Comment>(await _commentService.GetAsync(id));
+                var comment = await _commentService.GetAsync(id);
                 if (comment == null)
                     return NotFound();
                 patchDocument.ApplyTo(comment);
