@@ -1,8 +1,6 @@
 using AutoMapper;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
-using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
 using Reakt.Application.Persistence.Models;
 using Reakt.Application.Services;
@@ -11,25 +9,13 @@ using Reakt.Server.MapperConfig;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel.Design;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Reakt.Application.Tests.Unit
 {
     [TestFixture]
     public class PostServiceTests
     {
-        private readonly ReadOnlyCollection<Board> _boardData = new ReadOnlyCollection<Board>(new List<Board>()
-        { new Board()
-            {
-                Id = 1,
-                Title = "Only board",
-                Description = "UT board",
-                Posts = new List<Post>()
-            }
-        });
-
         private readonly ReadOnlyCollection<Post> _postData = new ReadOnlyCollection<Post>(new List<Post>()
         {
             new Post()
@@ -40,8 +26,7 @@ namespace Reakt.Application.Tests.Unit
                 BoardId = 1,
                 Active = true,
                 UpdatedAt = new DateTime(2020,10,01,12,12,12),
-                CreatedAt = new DateTime(2020,10,01,10,10,10),
-                Comments = new List<Comment>()
+                CreatedAt = new DateTime(2020,10,01,10,10,10)
             },
             new Post()
             {
@@ -51,8 +36,7 @@ namespace Reakt.Application.Tests.Unit
                 BoardId = 1,
                 Active = true,
                 UpdatedAt = new DateTime(2020,10,01,12,12,12),
-                CreatedAt = new DateTime(2020,10,01,10,10,10),
-                Comments = new List<Comment>()
+                CreatedAt = new DateTime(2020,10,01,10,10,10)
             },
             new Post()
             {
@@ -62,50 +46,13 @@ namespace Reakt.Application.Tests.Unit
                 BoardId = 2,
                 Active = true,
                 UpdatedAt = new DateTime(2020,10,01,12,12,12),
-                CreatedAt = new DateTime(2020,10,01,10,10,10),
-                Comments = new List<Comment>()
+                CreatedAt = new DateTime(2020,10,01,10,10,10)
             },
         });
 
         private ReaktDbContext _context;
         private IMapper _mapper;
         private PostService _postService;
-
-        private ReaktDbContext InitializeContext(string storeName)
-        {
-            //setup inmemorydb
-            var context = new ReaktDbContext(
-                new DbContextOptionsBuilder<ReaktDbContext>()
-                .UseInMemoryDatabase(Guid.NewGuid().ToString())
-                .Options);
-            context.Posts.AddRange(_postData);
-            context.Boards.AddRange(_boardData);
-            context.SaveChanges();
-
-            return context;
-        }
-
-        //[Test]
-        //public void AddAsync_Should_Add_Post_To_Board()
-        //{
-        //    //Arrange
-        //    var boardId = 1;
-        //    var post = new Domain.Models.Post()
-        //    {
-        //        Title = "new created",
-        //        Description = "new created",
-        //        BoardId = boardId,
-        //        Comments = new List<Domain.Models.Comment>()
-        //    };
-
-        //    //Act
-        //    var result = _postService.AddAsync(boardId, post).Result;
-        //    var board = _context.Boards.Include(b => b.Posts)
-        //                               .First(b => b.Id == result.BoardId);
-
-        //    //Assert
-        //    board.Posts.Should().Contain(p => p.Id == result.Id);
-        //}
 
         [Test]
         public void AddAsync_Should_Add_Post_To_DbContext()
@@ -116,8 +63,7 @@ namespace Reakt.Application.Tests.Unit
             {
                 Title = "new created",
                 Description = "new created",
-                BoardId = boardId,
-                Comments = new List<Domain.Models.Comment>()
+                BoardId = boardId
             };
 
             //Act
@@ -136,8 +82,7 @@ namespace Reakt.Application.Tests.Unit
             {
                 Title = "new created",
                 Description = "new created",
-                BoardId = boardId,
-                Comments = new List<Domain.Models.Comment>()
+                BoardId = boardId
             };
 
             //Act
@@ -148,7 +93,6 @@ namespace Reakt.Application.Tests.Unit
         }
 
         [Test]
-        [Ignore("Problemas con async")]
         public void CreateAsync_Should_Throw_Exception()
         {
             //Arrange
@@ -156,7 +100,7 @@ namespace Reakt.Application.Tests.Unit
             var domainPost = _mapper.Map<Domain.Models.Post>(post);
 
             //Act-Assert
-            Assert.Throws<NotImplementedException>(async () => await _postService.CreateAsync(domainPost));
+            _postService.Invoking(x => x.CreateAsync(domainPost)).Should().Throw<NotImplementedException>();
         }
 
         [Test]
@@ -167,10 +111,10 @@ namespace Reakt.Application.Tests.Unit
 
             //Act
             _postService.DeleteAsync(id).Wait();
-            var isActive = _postData.First(p => p.Id == id).Active;
+            var result = _context.Posts.FirstOrDefault(x => x.Id == id);
 
             //Assert
-            isActive.Should().BeFalse();
+            result.Should().BeNull();
         }
 
         [Test]
@@ -213,7 +157,6 @@ namespace Reakt.Application.Tests.Unit
         }
 
         [Test]
-        [Ignore("TODO: Affected by AddAsync UTs... WHY ?")]
         public void Get_Should_Return_Results()
         {
             //Arrange
@@ -226,7 +169,6 @@ namespace Reakt.Application.Tests.Unit
         }
 
         [Test]
-        [Ignore("TODO: Affected by AddAsync UTs... WHY ?")]
         public void GetForBoard_Should_Return_Results()
         {
             //Arrange
@@ -249,7 +191,6 @@ namespace Reakt.Application.Tests.Unit
                 .UseInMemoryDatabase(Guid.NewGuid().ToString())
                 .Options);
             _context.Posts.AddRange(_postData);
-            _context.Boards.AddRange(_boardData);
             _context.SaveChanges();
 
             _mapper = new Mapper(new MapperConfiguration(conf => conf.AddProfile(new PostProfile())));

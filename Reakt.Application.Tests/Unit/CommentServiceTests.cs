@@ -22,6 +22,7 @@ namespace Reakt.Application.Tests.Unit
                 Id = 1,
                 Message = "Test message",
                 PostId = 1,
+                Active = true
             }
         };
 
@@ -41,7 +42,6 @@ namespace Reakt.Application.Tests.Unit
             expected = _mapper.Map<Domain.Models.Comment>(_context.Comments.First(c => c.Id == result.Id));
             //Arrange
             result.Should().BeEquivalentTo(expected);
-            _context.Comments.First(c => c.Id == result.Id);
         }
 
         [Test]
@@ -51,9 +51,12 @@ namespace Reakt.Application.Tests.Unit
 
             //Act
             _commentService.DeleteAsync(1).Wait();
-            var expected = _context.Comments.FirstOrDefault(c => c.Id == 1);
+            var expected = _context.Comments
+                .IgnoreQueryFilters()
+                .FirstOrDefault(c => c.Id == 1);
             //Arrange
-            expected.Should().BeNull();
+            expected.Active.Should().Be(false);
+            expected.DeletedAt.Should().NotBeNull();
         }
 
         [Test]
