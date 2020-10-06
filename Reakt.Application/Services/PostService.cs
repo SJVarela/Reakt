@@ -10,6 +10,9 @@ using System.Threading.Tasks;
 
 namespace Reakt.Application.Services
 {
+    /// <summary>
+    /// The Post application service
+    /// </summary>
     public class PostService : IPostService
     {
         private readonly IReaktDbContext _dbContext;
@@ -25,28 +28,39 @@ namespace Reakt.Application.Services
         /// <summary>
         /// Create a Post in a Board
         /// </summary>
-        /// <param name="boardId"></param>
+        /// <param name="boardId">The Board where the Post belongs</param>
         /// <param name="entity">Post properties</param>
-        /// <returns>The created Post</returns>
-        public async Task<Post> CreateAsync(long boardId, Post entity)
+        /// <returns>The created Post </returns>
+        public async Task<Post> AddAsync(long boardId, Post entity)
         {
             var post = _mapper.Map<Persistence.Models.Post>(entity);
             post.BoardId = boardId;
-            var result = await _dbContext.Posts.AddAsync(post);
+            var result = _dbContext.Posts.Add(post).Entity;
             await _dbContext.SaveChangesAsync();
 
             return _mapper.Map<Post>(result);
         }
 
+        /// <summary>
+        /// Create a standalone Post
+        /// </summary>
+        /// <param name="entity">Post properties</param>
+        /// <returns>Not implemented exception</returns>
         public async Task<Post> CreateAsync(Post entity)
         {
             //No way to create a post without a board
-            throw new NotImplementedException();
+            await Task.Run(() => throw new NotImplementedException());
+
+            return null;
         }
 
-        public async void DeleteAsync(long id)
+        /// <summary>
+        /// Delete a Post
+        /// </summary>
+        /// <param name="id">An existing Post identifier</param>
+        public async Task DeleteAsync(long id)
         {
-            var post = _dbContext.Posts.First(x => x.Id == id);
+            var post = _dbContext.Posts.Find(id);
             _dbContext.Posts.Remove(post);
             await _dbContext.SaveChangesAsync();
         }
@@ -88,11 +102,9 @@ namespace Reakt.Application.Services
         public async Task<Post> UpdateAsync(Post entity)
         {
             var oldPost = await _dbContext.Posts.FindAsync(entity.Id);
-            oldPost.Title = entity.Title;
-            oldPost.Description = entity.Description;
-            oldPost.BoardId = entity.BoardId;
+            _mapper.Map(entity, oldPost);
 
-            var newPost = _dbContext.Posts.Update(oldPost);
+            var newPost = _dbContext.Posts.Update(oldPost).Entity;
             await _dbContext.SaveChangesAsync();
 
             return _mapper.Map<Post>(newPost);

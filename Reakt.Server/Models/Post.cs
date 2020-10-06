@@ -1,10 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System;
 
 namespace Reakt.Server.Models
 {
     /// <summary>
-    /// A Reaktive post
+    /// A Reaktive board post
     /// </summary>
     public class Post : AuditableEntity
     {
@@ -16,12 +17,16 @@ namespace Reakt.Server.Models
         /// <summary>
         /// Post description
         /// </summary>
+        [MaxLength(4000)]
+        [MinLength(1)]
         public string Description { get; set; }
 
         /// <summary>
-        /// Post title
+        /// Post Title
         /// </summary>
         [Required]
+        [MaxLength(100)]
+        [MinLength(1)]
         public string Title { get; set; }
     }
 }
