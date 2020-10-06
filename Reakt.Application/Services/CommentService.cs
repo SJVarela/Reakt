@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using Reakt.Application.Contracts.Interfaces;
 using Reakt.Application.Persistence;
 using Reakt.Domain.Models;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -33,18 +32,18 @@ namespace Reakt.Application.Services
 
         public Task<Comment> CreateAsync(Comment entity)
         {
-            throw new NotImplementedException();
+            throw new System.NotImplementedException();
         }
 
-        public void Delete(long id)
+        public async Task DeleteAsync(long id)
         {
-            throw new NotImplementedException();
+            _dbContext.Comments.Remove(_dbContext.Comments.First(x => x.Id == id));
+            await _dbContext.SaveChangesAsync();
         }
 
         public async Task<IEnumerable<Comment>> GetAsync()
         {
-            return _mapper.Map<IEnumerable<Comment>>(
-                await _dbContext.Comments.ToListAsync());
+            return _mapper.Map<IEnumerable<Comment>>(await _dbContext.Comments.ToListAsync());
         }
 
         public async Task<Comment> GetAsync(long id)
@@ -55,17 +54,17 @@ namespace Reakt.Application.Services
 
         public async Task<IEnumerable<Comment>> GetForPostAsync(long postId, int startRange, int endRange)
         {
-            return _mapper.Map<IEnumerable<Comment>>(
-                await _dbContext.Comments.Where(c => c.PostId == postId)
+            var result = await _dbContext.Comments.Where(c => c.PostId == postId)
                                          .OrderByDescending(c => c.CreatedAt)
                                          .Skip(startRange)
                                          .Take(endRange - startRange)
-                                         .ToListAsync());
+                                         .ToListAsync();
+            return _mapper.Map<IEnumerable<Comment>>(result);
         }
 
         public void Like(long id)
         {
-            throw new NotImplementedException();
+            throw new System.NotImplementedException();
         }
 
         public async Task<Comment> UpdateAsync(Comment entity)

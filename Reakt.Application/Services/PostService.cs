@@ -30,7 +30,7 @@ namespace Reakt.Application.Services
         /// </summary>
         /// <param name="boardId">The Board where the Post belongs</param>
         /// <param name="entity">Post properties</param>
-        /// <returns>The created Post </returns>
+        /// <returns>The created Post</returns>
         public async Task<Post> AddAsync(long boardId, Post entity)
         {
             var post = _mapper.Map<Persistence.Models.Post>(entity);

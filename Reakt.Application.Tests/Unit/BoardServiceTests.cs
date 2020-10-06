@@ -6,6 +6,7 @@ using Reakt.Application.Persistence.Models;
 using Reakt.Application.Services;
 using Reakt.Persistance.DataAccess;
 using Reakt.Server.MapperConfig;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -55,13 +56,14 @@ namespace Reakt.Application.Tests.Unit
             result.Should().BeEquivalentTo(expected);
         }
 
-        [OneTimeSetUp]
+        [SetUp]
         public void Setup()
         {
             //setup inmemorydb
-            var x = new DbContextOptionsBuilder<ReaktDbContext>();
-            x.UseInMemoryDatabase("UtDb");
-            _context = new ReaktDbContext(x.Options);
+            _context = new ReaktDbContext(
+                new DbContextOptionsBuilder<ReaktDbContext>()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .Options);
             _context.Boards.AddRange(_mockData);
             _context.SaveChanges();
 

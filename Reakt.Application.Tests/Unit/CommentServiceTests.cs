@@ -6,9 +6,9 @@ using Reakt.Application.Persistence.Models;
 using Reakt.Application.Services;
 using Reakt.Persistance.DataAccess;
 using Reakt.Server.MapperConfig;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Reakt.Application.Tests.Unit
 {
@@ -32,36 +32,62 @@ namespace Reakt.Application.Tests.Unit
         private IMapper _mapper;
 
         [Test]
-        public async Task Get_by_Id_Should_Return_Results()
+        public void AddCommentAsync_Should_AddItem_Return_Results()
+        {
+            //Arrange
+            var expected = new Domain.Models.Comment() { Message = "A new comment" };
+            //Act
+            var result = _commentService.AddCommentAsync(1, expected).Result;
+            expected = _mapper.Map<Domain.Models.Comment>(_context.Comments.First(c => c.Id == result.Id));
+            //Arrange
+            result.Should().BeEquivalentTo(expected);
+            _context.Comments.First(c => c.Id == result.Id);
+        }
+
+        [Test]
+        public void DeleteAsync_Should_UpdateDate_Active_To_False()
+        {
+            //Arrange
+
+            //Act
+            _commentService.DeleteAsync(1).Wait();
+            var expected = _context.Comments.FirstOrDefault(c => c.Id == 1);
+            //Arrange
+            expected.Should().BeNull();
+        }
+
+        [Test]
+        public void Get_by_Id_Should_Return_Results()
         {
             //Arrange
             var expected = _mapper.Map<Domain.Models.Comment>(_mockData.First(b => b.Id == 1));
             //Act
-            var result = await _commentService.GetAsync(1);
+            var result = _commentService.GetAsync(1).Result;
 
             //Arrange
             result.Should().BeEquivalentTo(expected);
         }
 
         [Test]
-        public async Task Get_Should_Return_Results()
+        public void Get_Should_Return_Results()
         {
             //Arrange
             var expected = _mapper.Map<List<Domain.Models.Comment>>(_mockData);
             //Act
-            var result = await _commentService.GetAsync();
+            var result = _commentService.GetAsync().Result;
 
             //Arrange
             result.Should().BeEquivalentTo(expected);
         }
 
-        [OneTimeSetUp]
+        [SetUp]
         public void Setup()
         {
             //setup inmemorydb
-            var x = new DbContextOptionsBuilder<ReaktDbContext>();
-            x.UseInMemoryDatabase("UtDb");
-            _context = new ReaktDbContext(x.Options);
+            _context = new ReaktDbContext(
+                new DbContextOptionsBuilder<ReaktDbContext>()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .Options);
             _context.Comments.AddRange(_mockData);
             _context.SaveChanges();
 

@@ -10,8 +10,10 @@ namespace Reakt.Server.MapperConfig
         /// </summary>
         public PostProfile()
         {
-            CreateMap<Reakt.Application.Persistence.Models.Post, Reakt.Domain.Models.Post>().ReverseMap();
-            CreateMap<Reakt.Domain.Models.Post, Reakt.Server.Models.Post>().ReverseMap();
+            CreateMap<Application.Persistence.Models.Post, Domain.Models.Post>()
+                .ReverseMap();
+            CreateMap<Domain.Models.Post, Models.Post>()
+                .ReverseMap();
         }
     }
 }

@@ -11,10 +11,10 @@ namespace Reakt.Server.MapperConfig
         /// </summary>
         public CommentProfile()
         {
-            CreateMap<Domain.Models.Comment, Models.Comment>();
-            CreateMap<Models.Comment, Domain.Models.Comment>();
-            CreateMap<Application.Persistence.Models.Comment, Domain.Models.Comment>();
-            CreateMap<Domain.Models.Comment, Application.Persistence.Models.Comment>();
+            CreateMap<Domain.Models.Comment, Models.Comment>()
+                .ReverseMap();
+            CreateMap<Application.Persistence.Models.Comment, Domain.Models.Comment>()
+                .ReverseMap();
         }
     }
 }

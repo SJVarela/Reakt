@@ -2,7 +2,7 @@
 
 namespace Reakt.Application.Contracts.Interfaces
 {
-    public interface IBoardService : ICrudAsyncService<Board>
+    public interface IBoardService : ICrudServiceAsync<Board>
     {
     }
 }

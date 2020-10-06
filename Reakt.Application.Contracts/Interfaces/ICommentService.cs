@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace Reakt.Application.Contracts.Interfaces
 {
-    public interface ICommentService : ICrudAsyncService<Comment>
+    public interface ICommentService : ICrudServiceAsync<Comment>
     {
         Task<Comment> AddCommentAsync(long postId, Comment comment);
 
