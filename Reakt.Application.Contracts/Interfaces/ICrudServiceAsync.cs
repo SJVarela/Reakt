@@ -7,7 +7,7 @@ namespace Reakt.Application.Contracts.Interfaces
     {
         Task<T> CreateAsync(T entity);
 
-        void DeleteAsync(long id);
+        Task DeleteAsync(long id);
 
         Task<IEnumerable<T>> GetAsync();
 
