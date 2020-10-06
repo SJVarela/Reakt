@@ -50,11 +50,10 @@ namespace Reakt.Application.Tests.Unit
             //Arrange
 
             //Act
-            _commentService.DeleteAsync(1);
+            _commentService.DeleteAsync(1).Wait();
             var expected = _context.Comments.FirstOrDefault(c => c.Id == 1);
             //Arrange
-            expected.Active.Should().Be(false);
-            expected.DeletedAt.Should().NotBeNull();
+            expected.Should().BeNull();
         }
 
         [Test]
