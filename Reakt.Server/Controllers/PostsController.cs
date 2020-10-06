@@ -89,7 +89,7 @@ namespace Reakt.Server.Controllers
         [Route("posts")]
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<IEnumerable<Post>>> Get()
+        public async Task<ActionResult<IEnumerable<Post>>> GetAsync()
         {
             try
             {
@@ -111,7 +111,7 @@ namespace Reakt.Server.Controllers
         [HttpGet("posts/{id}")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<Post>> GetById(long id)
+        public async Task<ActionResult<Post>> GetByIdAsync(long id)
         {
             try
             {
@@ -131,6 +131,8 @@ namespace Reakt.Server.Controllers
         /// Get all Posts for a Board
         /// </summary>
         /// <param name="boardId">Board identifier</param>
+        /// <param name="startRange">Pagination start index</param>
+        /// <param name="endRange">Pagination end index</param>
         /// <returns>List of Posts</returns>
         [Route("boards/{boardId}/posts")]
         [HttpGet]
