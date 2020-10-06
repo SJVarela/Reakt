@@ -35,7 +35,7 @@ namespace Reakt.Application.Services
             throw new System.NotImplementedException();
         }
 
-        public async void DeleteAsync(long id)
+        public async Task DeleteAsync(long id)
         {
             _dbContext.Comments.Remove(_dbContext.Comments.First(x => x.Id == id));
             await _dbContext.SaveChangesAsync();

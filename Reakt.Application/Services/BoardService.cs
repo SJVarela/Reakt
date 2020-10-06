@@ -25,7 +25,7 @@ namespace Reakt.Application.Services
             throw new System.NotImplementedException();
         }
 
-        public void DeleteAsync(long id)
+        public Task DeleteAsync(long id)
         {
             throw new System.NotImplementedException();
         }
