@@ -7,6 +7,7 @@ namespace Reakt.Application.Contracts.Interfaces
     public interface IPostService : ICrudServiceAsync<Post>
     {
         Task<Post> AddAsync(long boardId, Post entity);
-        Task<IEnumerable<Post>> GetForBoardAsync(long boardId);
+
+        Task<IEnumerable<Post>> GetForBoardAsync(long boardId, int startRange, int endRange);
     }
 }

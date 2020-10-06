@@ -87,11 +87,19 @@ namespace Reakt.Application.Services
         /// <summary>
         /// Get all Posts for a given Board
         /// </summary>
-        /// <param name="boardId"></param>
+        /// <param name="boardId">Board identifier</param>
+        /// <param name="startRange">Page init</param>
+        /// <param name="endRange">Page end</param>
         /// <returns>List of Posts in given Board</returns>
-        public async Task<IEnumerable<Post>> GetForBoardAsync(long boardId)
+        public async Task<IEnumerable<Post>> GetForBoardAsync(long boardId, int startRange, int endRange)
         {
-            return _mapper.Map<IEnumerable<Post>>(await _dbContext.Posts.Where(x => x.BoardId == boardId).ToListAsync());
+            var result = await _dbContext.Posts.Where(x => x.BoardId == boardId)
+                                               .OrderByDescending(c => c.CreatedAt)
+                                               .Skip(startRange)
+                                               .Take(endRange - startRange)
+                                               .ToListAsync();
+
+            return _mapper.Map<IEnumerable<Post>>(result);
         }
 
         /// <summary>
