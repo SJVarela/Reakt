@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using Reakt.Application.Contracts.Interfaces;
 using Reakt.Application.Persistence;
 using Reakt.Domain.Models;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -33,12 +32,12 @@ namespace Reakt.Application.Services
 
         public Task<Comment> CreateAsync(Comment entity)
         {
-            throw new NotImplementedException();
+            throw new System.NotImplementedException();
         }
 
-        public void Delete(long id)
+        public void DeleteAsync(long id)
         {
-            throw new NotImplementedException();
+            throw new System.NotImplementedException();
         }
 
         public async Task<IEnumerable<Comment>> GetAsync()
@@ -65,7 +64,7 @@ namespace Reakt.Application.Services
 
         public void Like(long id)
         {
-            throw new NotImplementedException();
+            throw new System.NotImplementedException();
         }
 
         public async Task<Comment> UpdateAsync(Comment entity)

@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using Reakt.Application.Contracts.Interfaces;
 using Reakt.Application.Persistence;
 using Reakt.Domain.Models;
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -21,14 +20,14 @@ namespace Reakt.Application.Services
             _mapper = mapper;
         }
 
-        public Task<Board> CreateAsync(Board enity)
+        public Task<Board> CreateAsync(Board entity)
         {
-            throw new NotImplementedException();
+            throw new System.NotImplementedException();
         }
 
-        public void Delete(long id)
+        public void DeleteAsync(long id)
         {
-            throw new NotImplementedException();
+            throw new System.NotImplementedException();
         }
 
         public async Task<IEnumerable<Board>> GetAsync()
@@ -41,14 +40,9 @@ namespace Reakt.Application.Services
             return _mapper.Map<Board>(await _dbContext.Boards.FirstOrDefaultAsync(b => b.Id == id));
         }
 
-        public Board UpdateAsync(Board enity)
+        public Task<Board> UpdateAsync(Board entity)
         {
-            throw new NotImplementedException();
-        }
-
-        Task<Board> ICrudAsyncService<Board>.UpdateAsync(Board enity)
-        {
-            throw new NotImplementedException();
+            throw new System.NotImplementedException();
         }
     }
 }

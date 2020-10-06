@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using Reakt.Application.Contracts.Interfaces;
 using Reakt.Application.Persistence;
 using Reakt.Domain.Models;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -38,10 +37,9 @@ namespace Reakt.Application.Services
             return _mapper.Map<Post>(result);
         }
 
-        public async Task<Post> CreateAsync(Post entity)
+        public Task<Post> CreateAsync(Post entity)
         {
-            //No way to create a post without a board
-            throw new NotImplementedException();
+            throw new System.NotImplementedException();
         }
 
         public async void DeleteAsync(long id)

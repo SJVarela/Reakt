@@ -10,8 +10,10 @@ namespace Reakt.Server.MapperConfig
         /// </summary>
         public BoardProfile()
         {
-            CreateMap<Reakt.Domain.Models.Board, Reakt.Server.Models.Board>();
-            CreateMap<Reakt.Application.Persistence.Models.Board, Reakt.Domain.Models.Board>();
+            CreateMap<Reakt.Domain.Models.Board, Reakt.Server.Models.Board>()
+                .ReverseMap();
+            CreateMap<Reakt.Application.Persistence.Models.Board, Reakt.Domain.Models.Board>()
+                .ReverseMap();
         }
     }
 }
