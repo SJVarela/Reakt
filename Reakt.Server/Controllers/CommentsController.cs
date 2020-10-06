@@ -82,7 +82,6 @@ namespace Reakt.Server.Controllers
             }
         }
 
-        //TODO: We should add pagination
         /// <summary>
         /// Gets all the comments for a posts
         /// </summary>
