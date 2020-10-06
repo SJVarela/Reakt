@@ -45,6 +45,19 @@ namespace Reakt.Application.Tests.Unit
         }
 
         [Test]
+        public void DeleteAsync_Should_UpdateDate_Active_To_False()
+        {
+            //Arrange
+
+            //Act
+            _commentService.DeleteAsync(1);
+            var expected = _context.Comments.FirstOrDefault(c => c.Id == 1);
+            //Arrange
+            expected.Active.Should().Be(false);
+            expected.DeletedAt.Should().NotBeNull();
+        }
+
+        [Test]
         public void Get_by_Id_Should_Return_Results()
         {
             //Arrange
