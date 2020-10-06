@@ -42,8 +42,7 @@ namespace Reakt.Application.Services
 
         public async Task<IEnumerable<Comment>> GetAsync()
         {
-            return _mapper.Map<IEnumerable<Comment>>(
-                await _dbContext.Comments.ToListAsync());
+            return _mapper.Map<IEnumerable<Comment>>(await _dbContext.Comments.ToListAsync());
         }
 
         public async Task<Comment> GetAsync(long id)
@@ -54,12 +53,12 @@ namespace Reakt.Application.Services
 
         public async Task<IEnumerable<Comment>> GetForPostAsync(long postId, int startRange, int endRange)
         {
-            return _mapper.Map<IEnumerable<Comment>>(
-                await _dbContext.Comments.Where(c => c.PostId == postId)
+            var result = await _dbContext.Comments.Where(c => c.PostId == postId)
                                          .OrderByDescending(c => c.CreatedAt)
                                          .Skip(startRange)
                                          .Take(endRange - startRange)
-                                         .ToListAsync());
+                                         .ToListAsync();
+            return _mapper.Map<IEnumerable<Comment>>(result);
         }
 
         public void Like(long id)

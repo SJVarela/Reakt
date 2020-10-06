@@ -10,16 +10,16 @@ namespace Reakt.Server.Models
         /// <summary>
         /// Date the entity was created
         /// </summary>
-        public DateTime CreatedAt { get; set; }
+        public DateTime CreatedAt { get; private set; }
 
         /// <summary>
         /// Date the entity was deleted
         /// </summary>
-        public DateTime? DeletedAt { get; set; }
+        public DateTime? DeletedAt { get; private set; }
 
         /// <summary>
         /// Date the entity was updated
         /// </summary>
-        public DateTime? UpdatedAt { get; set; }
+        public DateTime? UpdatedAt { get; private set; }
     }
 }

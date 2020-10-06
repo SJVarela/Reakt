@@ -92,7 +92,7 @@ namespace Reakt.Server.Controllers
         /// <returns>List of comments</returns>
         [HttpGet("posts/{postId}/comments")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<IEnumerable<Comment>>> GetForPostAsync([FromRoute] long postId, int startRange = 0, int endRange = 50)
         {
             if (startRange >= endRange)

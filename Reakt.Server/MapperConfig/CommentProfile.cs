@@ -13,7 +13,7 @@ namespace Reakt.Server.MapperConfig
         {
             CreateMap<Domain.Models.Comment, Models.Comment>()
                 .ReverseMap();
-            CreateMap<Models.Comment, Domain.Models.Comment>()
+            CreateMap<Application.Persistence.Models.Comment, Domain.Models.Comment>()
                 .ReverseMap();
         }
     }
