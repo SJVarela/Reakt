@@ -181,7 +181,7 @@ namespace Reakt.Application.Tests.Unit
 
             //Act
             _postService.DeleteAsync(id).Wait();
-            var deletedAt = _postData.First(p => p.Id == id).DeletedAt;
+            var deletedAt = _context.Posts.IgnoreQueryFilters().First(p => p.Id == id).DeletedAt;
 
             //Assert
             deletedAt.Should().NotBeNull();
@@ -234,7 +234,7 @@ namespace Reakt.Application.Tests.Unit
             var expected = _mapper.Map<List<Domain.Models.Post>>(_postData.Where(x => x.BoardId == boardId));
 
             //Act
-            var result = _postService.GetForBoardAsync(boardId).Result;
+            var result = _postService.GetForBoardAsync(boardId, 0, 50).Result;
 
             //Arrange
             result.Should().BeEquivalentTo(expected);
@@ -249,7 +249,6 @@ namespace Reakt.Application.Tests.Unit
                 .UseInMemoryDatabase(Guid.NewGuid().ToString())
                 .Options);
             _context.Posts.AddRange(_postData);
-            _context.Boards.AddRange(_boardData);
             _context.SaveChanges();
 
             _mapper = new Mapper(new MapperConfiguration(conf => conf.AddProfile(new PostProfile())));

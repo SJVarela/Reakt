@@ -49,7 +49,6 @@ namespace Reakt.Server.Controllers
             {
                 var post = _mapper.Map<Domain.Models.Post>(postDto);
                 return Ok(_mapper.Map<Post>(await _postService.AddAsync(boardId, post)));
-
             }
             catch (Exception ex)
             {
@@ -136,11 +135,14 @@ namespace Reakt.Server.Controllers
         [Route("boards/{boardId}/posts")]
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<IEnumerable<Post>>> GetForBoardAsync([FromRoute] long boardId)
+        public async Task<ActionResult<IEnumerable<Post>>> GetForBoardAsync([FromRoute] long boardId, int startRange = 0, int endRange = 50)
         {
+            if (startRange > endRange)
+                return BadRequest("Pagination values are not valid");
+
             try
             {
-                var posts = await _postService.GetForBoardAsync(boardId);
+                var posts = await _postService.GetForBoardAsync(boardId, startRange, endRange);
                 if (posts == null)
                     return NotFound();
                 return Ok(_mapper.Map<IEnumerable<Post>>(posts));
