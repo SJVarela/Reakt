@@ -20,7 +20,7 @@ namespace Reakt.Application.Tests.Unit
 
         private ReaktDbContext _context;
 
-        private EntityFactory<DM.Comment> _entityFactory = new EntityFactory<DM.Comment>();
+        private EntityFactory<DM.Comment> _entityFactory;
         private IMapper _mapper;
 
         [Test]
@@ -48,6 +48,13 @@ namespace Reakt.Application.Tests.Unit
             //Assert
             expected.Active.Should().Be(false);
             expected.DeletedAt.Should().NotBeNull();
+        }
+
+        [OneTimeSetUp]
+        public void FixtureSetup()
+        {
+            _mapper = new Mapper(new MapperConfiguration(conf => conf.AddProfile(new CommentProfile())));
+            _entityFactory = new EntityFactory<DM.Comment>();
         }
 
         [Test]

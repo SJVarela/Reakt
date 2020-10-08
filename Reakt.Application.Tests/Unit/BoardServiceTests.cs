@@ -20,8 +20,15 @@ namespace Reakt.Application.Tests.Unit
 
         private ReaktDbContext _context;
 
-        private EntityFactory<DM.Board> _entityFactory = new EntityFactory<DM.Board>();
+        private EntityFactory<DM.Board> _entityFactory;
         private IMapper _mapper;
+
+        [OneTimeSetUp]
+        public void FixtureSetup()
+        {
+            _mapper = new Mapper(new MapperConfiguration(conf => conf.AddProfile(new BoardProfile())));
+            _entityFactory = new EntityFactory<DM.Board>();
+        }
 
         [Test]
         public async Task Get_by_Id_Should_Return_Results()
@@ -50,7 +57,6 @@ namespace Reakt.Application.Tests.Unit
         [SetUp]
         public void Setup()
         {
-            _mapper = new Mapper(new MapperConfiguration(conf => conf.AddProfile(new BoardProfile())));
             _context = MockDbContextFactory.BuildInMemory(_mapper.Map<List<PM.Board>>(_entityFactory.BuildMockList(1, 4)));
             _boardService = new BoardService(_context, _mapper);
         }

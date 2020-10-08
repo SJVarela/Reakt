@@ -18,7 +18,7 @@ namespace Reakt.Application.Tests.Unit
     public class PostServiceTests
     {
         private ReaktDbContext _context;
-        private EntityFactory<DM.Post> _entityFactory = new EntityFactory<DM.Post>();
+        private EntityFactory<DM.Post> _entityFactory;
         private IMapper _mapper;
         private PostService _postService;
 
@@ -87,6 +87,13 @@ namespace Reakt.Application.Tests.Unit
 
             //Assert
             deletedAt.Should().NotBeNull();
+        }
+
+        [OneTimeSetUp]
+        public void FixtureSetup()
+        {
+            _mapper = new Mapper(new MapperConfiguration(conf => conf.AddProfile(new PostProfile())));
+            _entityFactory = new EntityFactory<DM.Post>();
         }
 
         [Test]
