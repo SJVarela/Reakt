@@ -77,18 +77,6 @@ namespace Reakt.Server
                 .AddNewtonsoftJson();
             //For testing!
             services.AddCors(opt => opt.AddDefaultPolicy(builder => builder.AllowAnyOrigin()));
-            /*
-            services.AddCors(options =>
-            {
-                options.AddDefaultPolicy(builder =>
-                {
-                    builder
-                    .WithOrigins(Configuration.GetValue<string>("URLWeb"))
-                    .AllowAnyHeader()
-                    .AllowAnyMethod();
-                });
-            });
-            */
 
             //DI services
             services.AddScoped<ICommentService, CommentService>();
