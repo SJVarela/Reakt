@@ -25,9 +25,9 @@ namespace Reakt.Server.Tests.Unit
 
         private readonly Mock<ILogger<CommentsController>> _logger = new Mock<ILogger<CommentsController>>();
 
-        private readonly List<Comment> _mockData = new List<Comment>()
+        private readonly List<Comment> _mockData = new List<Comment>
         {
-            new Comment()
+            new Comment
             {
                 Id = 1,
                 Message = "Test message",

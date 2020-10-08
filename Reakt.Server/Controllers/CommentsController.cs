@@ -72,7 +72,9 @@ namespace Reakt.Server.Controllers
             {
                 var comment = await _commentService.GetAsync(id);
                 if (comment == null)
+                {
                     return NotFound();
+                }
                 return Ok(_mapper.Map<Comment>(comment));
             }
             catch (Exception ex)
@@ -95,7 +97,9 @@ namespace Reakt.Server.Controllers
         public async Task<ActionResult<IEnumerable<Comment>>> GetForPostAsync([FromRoute] long postId, int startRange = 0, int endRange = 50)
         {
             if (startRange >= endRange)
+            {
                 return BadRequest();
+            }
             try
             {
                 var result = await _commentService.GetForPostAsync(postId, startRange, endRange);
@@ -123,7 +127,9 @@ namespace Reakt.Server.Controllers
             {
                 var comment = await _commentService.GetAsync(id);
                 if (comment == null)
+                {
                     return NotFound();
+                }
                 patchDocument.ApplyTo(comment);
                 var updatedComment = await _commentService.UpdateAsync(comment);
                 return Ok(_mapper.Map<Comment>(updatedComment));

@@ -179,7 +179,9 @@ namespace Reakt.Server.Controllers
             {
                 var post = await _postService.GetAsync(id);
                 if (post == null)
+                {
                     return NotFound();
+                }
                 patchDocument.ApplyTo(post);
                 var updatedPost = await _postService.UpdateAsync(post);
                 return Ok(_mapper.Map<Post>(updatedPost));
