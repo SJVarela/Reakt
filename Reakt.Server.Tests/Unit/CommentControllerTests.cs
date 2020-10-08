@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.JsonPatch.Operations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -14,10 +16,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Reakt.Application.Tests.Unit
+namespace Reakt.Server.Tests.Unit
 {
     [TestFixture]
-    internal class CommentControllerTests
+    public class CommentControllerTests
     {
         private readonly Mock<ICommentService> _commentService = new Mock<ICommentService>();
 
@@ -107,6 +109,23 @@ namespace Reakt.Application.Tests.Unit
         {
             _mapper = new Mapper(new MapperConfiguration(conf => conf.AddProfile(new CommentProfile())));
             _commentsController = new CommentsController(_logger.Object, _commentService.Object, _mapper);
+        }
+
+        [Test(Description = "Update should update values")]
+        public async Task UpdateAsync_Should_Return_UpdatedValues()
+        {
+            //Arrange
+            var patchDocument = new JsonPatchDocument();
+            patchDocument.Operations.Add(new Operation("add", "/message", "", "New message"));
+            var comment = _mockData.First();
+            patchDocument.ApplyTo(comment);
+
+            _commentService.Setup(x => x.UpdateAsync(It.IsAny<Comment>())).ReturnsAsync(comment);
+            _commentService.Setup(x => x.GetAsync(It.IsAny<long>())).ReturnsAsync(comment);
+            //Act
+            var result = (await _commentsController.UpdateAsync(1, patchDocument)).Result as OkObjectResult;
+            //Assert
+            result.Value.Should().BeEquivalentTo(comment);
         }
     }
 }

@@ -2,46 +2,37 @@
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using NUnit.Framework;
-using Reakt.Application.Persistence.Models;
 using Reakt.Application.Services;
+using Reakt.Application.Tests.MockFactories;
 using Reakt.Persistance.DataAccess;
 using Reakt.Server.MapperConfig;
-using System;
 using System.Collections.Generic;
 using System.Linq;
+using DM = Reakt.Domain.Models;
+using PM = Reakt.Application.Persistence.Models;
 
 namespace Reakt.Application.Tests.Unit
 {
     [TestFixture]
     internal class CommentServiceTests
     {
-        private readonly List<Comment> _mockData = new List<Comment>()
-        {
-            new Comment()
-            {
-                Id = 1,
-                Message = "Test message",
-                PostId = 1,
-            }
-        };
-
         private CommentService _commentService;
 
         private ReaktDbContext _context;
 
+        private EntityFactory<DM.Comment> _entityFactory;
         private IMapper _mapper;
 
         [Test]
         public void AddCommentAsync_Should_AddItem_Return_Results()
         {
             //Arrange
-            var expected = new Domain.Models.Comment() { Message = "A new comment" };
+            var expected = _entityFactory.BuildMock(5);
             //Act
             var result = _commentService.AddCommentAsync(1, expected).Result;
-            expected = _mapper.Map<Domain.Models.Comment>(_context.Comments.First(c => c.Id == result.Id));
+            expected.CreatedAt = result.CreatedAt;
             //Arrange
             result.Should().BeEquivalentTo(expected);
-            _context.Comments.First(c => c.Id == result.Id);
         }
 
         [Test]
@@ -51,47 +42,50 @@ namespace Reakt.Application.Tests.Unit
 
             //Act
             _commentService.DeleteAsync(1).Wait();
-            var expected = _context.Comments.FirstOrDefault(c => c.Id == 1);
-            //Arrange
-            expected.Should().BeNull();
+            var expected = _context.Comments
+                .IgnoreQueryFilters()
+                .FirstOrDefault(c => c.Id == 1);
+            //Assert
+            expected.Active.Should().Be(false);
+            expected.DeletedAt.Should().NotBeNull();
+        }
+
+        [OneTimeSetUp]
+        public void FixtureSetup()
+        {
+            _mapper = new Mapper(new MapperConfiguration(conf => conf.AddProfile(new CommentProfile())));
+            _entityFactory = new EntityFactory<DM.Comment>();
         }
 
         [Test]
-        public void Get_by_Id_Should_Return_Results()
+        public void GetAsync_Should_Return_Results()
         {
             //Arrange
-            var expected = _mapper.Map<Domain.Models.Comment>(_mockData.First(b => b.Id == 1));
+            var expected = _mapper.Map<List<DM.Comment>>(_context.Comments.ToList());
             //Act
-            var result = _commentService.GetAsync(1).Result;
+            var result = _commentService.GetAsync().Result;
 
-            //Arrange
+            //Assert
             result.Should().BeEquivalentTo(expected);
         }
 
         [Test]
-        public void Get_Should_Return_Results()
+        public void GetAsyncById_Should_Return_Results()
         {
             //Arrange
-            var expected = _mapper.Map<List<Domain.Models.Comment>>(_mockData);
+            var expected = _mapper.Map<DM.Comment>(_context.Comments.First(x => x.Id == 1));
             //Act
-            var result = _commentService.GetAsync().Result;
+            var result = _commentService.GetAsync(1).Result;
 
-            //Arrange
+            //Assert
             result.Should().BeEquivalentTo(expected);
         }
 
         [SetUp]
         public void Setup()
         {
-            //setup inmemorydb
-            _context = new ReaktDbContext(
-                new DbContextOptionsBuilder<ReaktDbContext>()
-                .UseInMemoryDatabase(Guid.NewGuid().ToString())
-                .Options);
-            _context.Comments.AddRange(_mockData);
-            _context.SaveChanges();
-
             _mapper = new Mapper(new MapperConfiguration(conf => conf.AddProfile(new CommentProfile())));
+            _context = MockDbContextFactory.BuildInMemory(_mapper.Map<List<PM.Comment>>(_entityFactory.BuildMockList(1, 4)));
             _commentService = new CommentService(_context, _mapper);
         }
     }
