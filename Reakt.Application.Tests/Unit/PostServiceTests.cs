@@ -2,55 +2,23 @@ using AutoMapper;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using NUnit.Framework;
-using Reakt.Application.Persistence.Models;
 using Reakt.Application.Services;
+using Reakt.Application.Tests.MockFactories;
 using Reakt.Persistance.DataAccess;
 using Reakt.Server.MapperConfig;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
+using DM = Reakt.Domain.Models;
+using PM = Reakt.Application.Persistence.Models;
 
 namespace Reakt.Application.Tests.Unit
 {
     [TestFixture]
     public class PostServiceTests
     {
-        private readonly ReadOnlyCollection<Post> _postData = new ReadOnlyCollection<Post>(new List<Post>()
-        {
-            new Post()
-            {
-                Id = 1,
-                Title = "Test title",
-                Description = "Test desc",
-                BoardId = 1,
-                Active = true,
-                UpdatedAt = new DateTime(2020,10,01,12,12,12),
-                CreatedAt = new DateTime(2020,10,01,10,10,10)
-            },
-            new Post()
-            {
-                Id = 2,
-                Title = "Test title 2",
-                Description = "Test desc 2",
-                BoardId = 1,
-                Active = true,
-                UpdatedAt = new DateTime(2020,10,01,12,12,12),
-                CreatedAt = new DateTime(2020,10,01,10,10,10)
-            },
-            new Post()
-            {
-                Id = 3,
-                Title = "Test 3",
-                Description = "Test 3",
-                BoardId = 2,
-                Active = true,
-                UpdatedAt = new DateTime(2020,10,01,12,12,12),
-                CreatedAt = new DateTime(2020,10,01,10,10,10)
-            },
-        });
-
         private ReaktDbContext _context;
+        private EntityFactory<DM.Post> _entityFactory = new EntityFactory<DM.Post>();
         private IMapper _mapper;
         private PostService _postService;
 
@@ -59,13 +27,8 @@ namespace Reakt.Application.Tests.Unit
         {
             //Arrange
             var boardId = 1;
-            var post = new Domain.Models.Post()
-            {
-                Title = "new created",
-                Description = "new created",
-                BoardId = boardId
-            };
-
+            var post = _entityFactory.BuildMock(5);
+            post.BoardId = boardId;
             //Act
             var result = _postService.AddAsync(boardId, post).Result;
 
@@ -78,12 +41,8 @@ namespace Reakt.Application.Tests.Unit
         {
             //Arrange
             var boardId = 1;
-            var post = new Domain.Models.Post()
-            {
-                Title = "new created",
-                Description = "new created",
-                BoardId = boardId
-            };
+            var post = _entityFactory.BuildMock(5);
+            post.BoardId = boardId;
 
             //Act
             var result = _postService.AddAsync(boardId, post).Result;
@@ -96,11 +55,10 @@ namespace Reakt.Application.Tests.Unit
         public void CreateAsync_Should_Throw_Exception()
         {
             //Arrange
-            var post = _postData.First();
-            var domainPost = _mapper.Map<Domain.Models.Post>(post);
+            var post = _entityFactory.BuildMock(5);
 
             //Act-Assert
-            _postService.Invoking(x => x.CreateAsync(domainPost)).Should().Throw<NotImplementedException>();
+            _postService.Invoking(x => x.CreateAsync(post)).Should().Throw<NotImplementedException>();
         }
 
         [Test]
@@ -132,10 +90,22 @@ namespace Reakt.Application.Tests.Unit
         }
 
         [Test]
-        public void Get_by_Id_Should_Return_Null_When_Id_Not_Found()
+        public void Get_Should_Return_Results()
         {
             //Arrange
-            var invalidId = _postData.Max(p => p.Id) + 100;
+            var expected = _mapper.Map<List<DM.Post>>(_context.Posts.ToList());
+            //Act
+            var result = _postService.GetAsync().Result;
+
+            //Arrange
+            result.Should().BeEquivalentTo(expected);
+        }
+
+        [Test]
+        public void GetAsyncById_Should_Return_Null_When_Id_Not_Found()
+        {
+            //Arrange
+            var invalidId = _context.Posts.Max(p => p.Id) + 1;
 
             //Act
             var result = _postService.GetAsync(invalidId).Result;
@@ -145,24 +115,12 @@ namespace Reakt.Application.Tests.Unit
         }
 
         [Test]
-        public void Get_by_Id_Should_Return_Results()
+        public void GetAsyncById_Should_Return_Results()
         {
             //Arrange
-            var expected = _mapper.Map<Domain.Models.Post>(_postData.First(b => b.Id == 1));
+            var expected = _mapper.Map<DM.Post>(_context.Posts.First(b => b.Id == 1));
             //Act
             var result = _postService.GetAsync(1).Result;
-
-            //Arrange
-            result.Should().BeEquivalentTo(expected);
-        }
-
-        [Test]
-        public void Get_Should_Return_Results()
-        {
-            //Arrange
-            var expected = _mapper.Map<List<Domain.Models.Post>>(_postData);
-            //Act
-            var result = _postService.GetAsync().Result;
 
             //Arrange
             result.Should().BeEquivalentTo(expected);
@@ -173,7 +131,7 @@ namespace Reakt.Application.Tests.Unit
         {
             //Arrange
             var boardId = 1;
-            var expected = _mapper.Map<List<Domain.Models.Post>>(_postData.Where(x => x.BoardId == boardId));
+            var expected = _mapper.Map<List<DM.Post>>(_context.Posts.Where(x => x.BoardId == boardId));
 
             //Act
             var result = _postService.GetForBoardAsync(boardId, 0, 50).Result;
@@ -186,14 +144,8 @@ namespace Reakt.Application.Tests.Unit
         public void Setup()
         {
             //setup inmemorydb
-            _context = new ReaktDbContext(
-                new DbContextOptionsBuilder<ReaktDbContext>()
-                .UseInMemoryDatabase(Guid.NewGuid().ToString())
-                .Options);
-            _context.Posts.AddRange(_postData);
-            _context.SaveChanges();
-
             _mapper = new Mapper(new MapperConfiguration(conf => conf.AddProfile(new PostProfile())));
+            _context = MockDbContextFactory.BuildInMemory(_mapper.Map<List<PM.Post>>(_entityFactory.BuildMockList(1, 4)));
             _postService = new PostService(_context, _mapper);
         }
 
@@ -202,16 +154,14 @@ namespace Reakt.Application.Tests.Unit
         {
             //Arrange
             var newTitle = "Modified Title";
-            var expected = _mapper.Map<Domain.Models.Post>(_postData.First(x => x.Id == 1));
+            var expected = _mapper.Map<DM.Post>(_context.Posts.First(x => x.Id == 1));
             expected.Title = newTitle;
-            var oldDate = expected.UpdatedAt;
 
             //Act
             var result = _postService.UpdateAsync(expected).Result;
 
             //Arrange
             result.UpdatedAt.Should().NotBeNull();
-            result.UpdatedAt.Should().BeAfter(oldDate.Value);
         }
 
         [Test]
@@ -219,7 +169,7 @@ namespace Reakt.Application.Tests.Unit
         {
             //Arrange
             var newTitle = "Modified Title";
-            var expected = _mapper.Map<Domain.Models.Post>(_postData.First(x => x.Id == 1));
+            var expected = _mapper.Map<DM.Post>(_context.Posts.First(x => x.Id == 1));
             expected.Title = newTitle;
 
             //Act
