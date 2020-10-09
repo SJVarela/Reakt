@@ -31,7 +31,7 @@ namespace Reakt.Persistance.DataAccess
                         break;
 
                     default:
-                        break;
+                        continue;
                 }
             }
         }
