@@ -91,7 +91,7 @@ namespace Reakt.Server.Controllers
         [Route("posts")]
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<IEnumerable<Post>>> Get()
+        public async Task<ActionResult<IEnumerable<Post>>> GetAsync()
         {
             try
             {
@@ -113,7 +113,7 @@ namespace Reakt.Server.Controllers
         [HttpGet("posts/{id}")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<Post>> GetById(long id)
+        public async Task<ActionResult<Post>> GetByIdAsync(long id)
         {
             try
             {
