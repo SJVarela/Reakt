@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using AutoFixture;
+using AutoMapper;
 using FluentAssertions;
 using NUnit.Framework;
 using Reakt.Application.Services;
@@ -20,23 +21,27 @@ namespace Reakt.Application.Tests.Unit
 
         private ReaktDbContext _context;
 
-        private EntityFactory<DM.Board> _entityFactory;
+        private Fixture _fixture;
         private IMapper _mapper;
 
         [OneTimeSetUp]
         public void FixtureSetup()
         {
             _mapper = new Mapper(new MapperConfiguration(conf => conf.AddProfile(new BoardProfile())));
-            _entityFactory = new EntityFactory<DM.Board>();
+            _fixture = new Fixture();
+            _fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList()
+                             .ForEach(b => _fixture.Behaviors.Remove(b));
+            _fixture.Behaviors.Add(new OmitOnRecursionBehavior());//recursionDepth
         }
 
         [Test]
         public async Task Get_by_Id_Should_Return_Results()
         {
+            var id = _context.Boards.Max(x => x.Id);
             //Arrange
-            var expected = _mapper.Map<DM.Board>(_context.Boards.First(b => b.Id == 1));
+            var expected = _mapper.Map<DM.Board>(_context.Boards.First(b => b.Id == id));
             //Act
-            var result = await _boardService.GetAsync(1);
+            var result = await _boardService.GetAsync(id);
 
             //Arrange
             result.Should().BeEquivalentTo(expected);
@@ -57,7 +62,7 @@ namespace Reakt.Application.Tests.Unit
         [SetUp]
         public void Setup()
         {
-            _context = MockDbContextFactory.BuildInMemory(_mapper.Map<List<PM.Board>>(_entityFactory.BuildMockList(1, 4)));
+            _context = MockDbContextFactory.BuildInMemory(_mapper.Map<List<PM.Board>>(_fixture.Build<PM.Board>().Without(x => x.Posts).CreateMany(10)));
             _boardService = new BoardService(_context, _mapper);
         }
     }
