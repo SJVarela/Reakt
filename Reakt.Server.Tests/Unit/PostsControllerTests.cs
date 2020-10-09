@@ -25,7 +25,7 @@ namespace Reakt.Server.Tests.Unit
 
         private readonly List<Post> _mockData = new List<Post>
         {
-            new Post()
+            new Post
             {
                 Id = 1,
                 Title = "Test post",
@@ -33,7 +33,7 @@ namespace Reakt.Server.Tests.Unit
                 CreatedAt = DateTime.Now,
                 Comments = new List<Comment>()
             },
-            new Post()
+            new Post
             {
                 Id = 2,
                 Title = "Test 2 post",
