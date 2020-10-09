@@ -21,7 +21,6 @@ namespace Reakt.Server.Controllers
         private readonly IMapper _mapper;
 
         /// <summary>
-        /// Default constructor
         /// </summary>
         /// <param name="boardService"></param>
         /// <param name="logger"></param>
@@ -34,8 +33,9 @@ namespace Reakt.Server.Controllers
         }
 
         /// <summary>
+        /// Get all boards
         /// </summary>
-        /// <returns></returns>
+        /// <returns>A List of boards</returns>
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<Board>>> GetAsync()
@@ -43,6 +43,31 @@ namespace Reakt.Server.Controllers
             try
             {
                 return Ok(_mapper.Map<IEnumerable<Board>>(await _boardService.GetAsync()));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+        }
+
+        /// <summary>
+        /// Get a board by id
+        /// </summary>
+        /// <returns>A board</returns>
+        [HttpGet("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<IEnumerable<Board>>> GetAsync(long id)
+        {
+            try
+            {
+                var board = await _boardService.GetAsync(id);
+                if (board is null)
+                {
+                    return NotFound();
+                }
+                return Ok(_mapper.Map<Board>(board));
             }
             catch (Exception ex)
             {

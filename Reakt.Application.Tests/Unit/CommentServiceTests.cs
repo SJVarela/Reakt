@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using AutoFixture;
+using AutoMapper;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using NUnit.Framework;
@@ -20,17 +21,20 @@ namespace Reakt.Application.Tests.Unit
 
         private ReaktDbContext _context;
 
-        private EntityFactory<DM.Comment> _entityFactory;
+        private Fixture _fixture;
         private IMapper _mapper;
 
         [Test]
         public void AddCommentAsync_Should_AddItem_Return_Results()
         {
             //Arrange
-            var expected = _entityFactory.BuildMock(5);
+            var expected = _fixture.Build<DM.Comment>()
+                                   .With(c => c.Id, 0)
+                                   .Create();
             //Act
             var result = _commentService.AddCommentAsync(1, expected).Result;
             expected.CreatedAt = result.CreatedAt;
+            expected.Id = result.Id;
             //Arrange
             result.Should().BeEquivalentTo(expected);
         }
@@ -39,12 +43,12 @@ namespace Reakt.Application.Tests.Unit
         public void DeleteAsync_Should_UpdateDate_Active_To_False()
         {
             //Arrange
-
+            var id = _context.Comments.First().Id;
             //Act
-            _commentService.DeleteAsync(1).Wait();
+            _commentService.DeleteAsync(id).Wait();
             var expected = _context.Comments
                 .IgnoreQueryFilters()
-                .FirstOrDefault(c => c.Id == 1);
+                .FirstOrDefault(c => c.Id == id);
             //Assert
             expected.Active.Should().Be(false);
             expected.DeletedAt.Should().NotBeNull();
@@ -54,7 +58,10 @@ namespace Reakt.Application.Tests.Unit
         public void FixtureSetup()
         {
             _mapper = new Mapper(new MapperConfiguration(conf => conf.AddProfile(new CommentProfile())));
-            _entityFactory = new EntityFactory<DM.Comment>();
+            _fixture = new Fixture();
+            _fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList()
+                             .ForEach(b => _fixture.Behaviors.Remove(b));
+            _fixture.Behaviors.Add(new OmitOnRecursionBehavior());//recursionDepth
         }
 
         [Test]
@@ -73,9 +80,10 @@ namespace Reakt.Application.Tests.Unit
         public void GetAsyncById_Should_Return_Results()
         {
             //Arrange
-            var expected = _mapper.Map<DM.Comment>(_context.Comments.First(x => x.Id == 1));
+            var id = _context.Comments.First().Id;
+            var expected = _mapper.Map<DM.Comment>(_context.Comments.First(x => x.Id == id));
             //Act
-            var result = _commentService.GetAsync(1).Result;
+            var result = _commentService.GetAsync(id).Result;
 
             //Assert
             result.Should().BeEquivalentTo(expected);
@@ -85,7 +93,7 @@ namespace Reakt.Application.Tests.Unit
         public void Setup()
         {
             _mapper = new Mapper(new MapperConfiguration(conf => conf.AddProfile(new CommentProfile())));
-            _context = MockDbContextFactory.BuildInMemory(_mapper.Map<List<PM.Comment>>(_entityFactory.BuildMockList(1, 4)));
+            _context = MockDbContextFactory.BuildInMemory(_mapper.Map<List<PM.Comment>>(_fixture.CreateMany<PM.Comment>(10)));
             _commentService = new CommentService(_context, _mapper);
         }
     }

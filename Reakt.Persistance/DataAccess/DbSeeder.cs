@@ -7,14 +7,14 @@ namespace Reakt.Persistance.DataAccess
     {
         public static void SeedDb(ModelBuilder builder)
         {
-            builder.Entity<Board>().HasData(new Board()
+            builder.Entity<Board>().HasData(new Board
             {
                 Id = 1,
                 Title = "Seed bored",
                 Description = "This is a seeded board"
             });
 
-            builder.Entity<Post>().HasData(new Post()
+            builder.Entity<Post>().HasData(new Post
             {
                 Id = 1,
                 Title = "Seed post",
@@ -22,7 +22,7 @@ namespace Reakt.Persistance.DataAccess
                 BoardId = 1
             });
 
-            builder.Entity<Comment>().HasData(new Comment()
+            builder.Entity<Comment>().HasData(new Comment
             {
                 Id = 1,
                 PostId = 1,
