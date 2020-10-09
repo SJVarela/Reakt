@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace Reakt.Server.Models
 {
@@ -21,8 +22,13 @@ namespace Reakt.Server.Models
         public string Message { get; set; }
 
         /// <summary>
-        /// Comment this replies to
+        /// Replies to this comment
         /// </summary>
-        public Comment Parent { get; set; }
+        public IEnumerable<Comment> Replies { get; set; }
+
+        /// <summary>
+        /// Number of replies to this comment
+        /// </summary>
+        public int ReplyCount { get; set; }
     }
 }

@@ -54,7 +54,7 @@ namespace Reakt.Application.Services
 
         public async Task<IEnumerable<Comment>> GetForPostAsync(long postId, int startRange, int endRange)
         {
-            var result = await _dbContext.Comments.Where(c => c.PostId == postId)
+            var result = await _dbContext.Comments.Where(c => c.PostId == postId && c.ParentId == null)
                                          .OrderByDescending(c => c.CreatedAt)
                                          .Skip(startRange)
                                          .Take(endRange - startRange)

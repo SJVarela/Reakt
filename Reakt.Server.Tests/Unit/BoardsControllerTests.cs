@@ -26,10 +26,10 @@ namespace Reakt.Server.Tests.Unit
         private IMapper _mapper;
 
         [Test]
-        public async Task Get_by_Id_Should_Return_OkResults()
+        public async Task GetAsyncById_Should_Return_OkResult()
         {
             //Arrange
-            var id = 5;
+            var id = 5L;
             var expected = _fixture.Build<DM.Board>()
                                    .With(x => x.Id, id)
                                    .Without(x => x.Posts)
