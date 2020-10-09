@@ -29,13 +29,11 @@ namespace Reakt.Persistance.DataAccess
                         entry.Entity.Active = false;
                         entry.State = EntityState.Modified;
                         break;
+
+                    default:
+                        continue;
                 }
             }
-        }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            base.OnConfiguring(optionsBuilder);
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

@@ -1,9 +1,11 @@
+using AutoFixture;
 using AutoMapper;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using NUnit.Framework;
 using Reakt.Application.Services;
 using Reakt.Application.Tests.MockFactories;
+
 using Reakt.Persistance.DataAccess;
 using Reakt.Server.MapperConfig;
 using System;
@@ -18,7 +20,7 @@ namespace Reakt.Application.Tests.Unit
     public class PostServiceTests
     {
         private ReaktDbContext _context;
-        private EntityFactory<DM.Post> _entityFactory;
+        private Fixture _fixture;
         private IMapper _mapper;
         private PostService _postService;
 
@@ -27,9 +29,11 @@ namespace Reakt.Application.Tests.Unit
         {
             //Arrange
             var boardId = 1;
-            var post = _entityFactory.BuildMock(5);
-            post.BoardId = boardId;
-          
+            var post = _fixture.Build<DM.Post>()
+                               .With(p => p.Id, 0)
+                               .Without(p => p.Comments)
+                               .Create();
+
             //Act
             var result = _postService.AddAsync(boardId, post).Result;
 
@@ -42,9 +46,10 @@ namespace Reakt.Application.Tests.Unit
         {
             //Arrange
             var boardId = 1;
-
-            var post = _entityFactory.BuildMock(5);
-            post.BoardId = boardId;
+            var post = _fixture.Build<DM.Post>()
+                               .With(p => p.Id, 0)
+                               .Without(p => p.Comments)
+                               .Create();
 
             //Act
             var result = _postService.AddAsync(boardId, post).Result;
@@ -57,7 +62,9 @@ namespace Reakt.Application.Tests.Unit
         public void CreateAsync_Should_Throw_Exception()
         {
             //Arrange
-            var post = _entityFactory.BuildMock(5);
+            var post = _fixture.Build<DM.Post>()
+                   .With(p => p.Id, 0)
+                   .Create();
 
             //Act-Assert
             _postService.Invoking(x => x.CreateAsync(post)).Should().Throw<NotImplementedException>();
@@ -67,7 +74,7 @@ namespace Reakt.Application.Tests.Unit
         public void Delete_Should_Mark_Items_Inactive()
         {
             //Arrange
-            var id = 1;
+            var id = _context.Posts.First().Id;
 
             //Act
             _postService.DeleteAsync(id).Wait();
@@ -81,7 +88,7 @@ namespace Reakt.Application.Tests.Unit
         public void Delete_Should_Populate_DeletedAt_Property()
         {
             //Arrange
-            var id = 1;
+            var id = _context.Posts.First().Id;
 
             //Act
             _postService.DeleteAsync(id).Wait();
@@ -95,7 +102,10 @@ namespace Reakt.Application.Tests.Unit
         public void FixtureSetup()
         {
             _mapper = new Mapper(new MapperConfiguration(conf => conf.AddProfile(new PostProfile())));
-            _entityFactory = new EntityFactory<DM.Post>();
+            _fixture = new Fixture();
+            _fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList()
+                             .ForEach(b => _fixture.Behaviors.Remove(b));
+            _fixture.Behaviors.Add(new OmitOnRecursionBehavior());//recursionDepth
         }
 
         [Test]
@@ -127,9 +137,9 @@ namespace Reakt.Application.Tests.Unit
         public void GetAsyncById_Should_Return_Results()
         {
             //Arrange
-            var expected = _mapper.Map<DM.Post>(_context.Posts.First(b => b.Id == 1));
+            var expected = _mapper.Map<DM.Post>(_context.Posts.First());
             //Act
-            var result = _postService.GetAsync(1).Result;
+            var result = _postService.GetAsync(expected.Id).Result;
 
             //Arrange
             result.Should().BeEquivalentTo(expected);
@@ -140,7 +150,7 @@ namespace Reakt.Application.Tests.Unit
         {
             //Arrange
             var boardId = 1;
-            var expected = _mapper.Map<List<DM.Post>>(_context.Posts.Where(x => x.BoardId == boardId));
+            var expected = _mapper.Map<List<DM.Post>>(_context.Posts);
 
             //Act
             var result = _postService.GetForBoardAsync(boardId, 0, 50).Result;
@@ -154,7 +164,7 @@ namespace Reakt.Application.Tests.Unit
         {
             //setup inmemorydb
             _mapper = new Mapper(new MapperConfiguration(conf => conf.AddProfile(new PostProfile())));
-            _context = MockDbContextFactory.BuildInMemory(_mapper.Map<List<PM.Post>>(_entityFactory.BuildMockList(1, 4)));
+            _context = MockDbContextFactory.BuildInMemory(_mapper.Map<List<PM.Post>>(_fixture.Build<PM.Post>().Without(x => x.Comments).CreateMany(10)));
             _postService = new PostService(_context, _mapper);
         }
 
@@ -163,7 +173,7 @@ namespace Reakt.Application.Tests.Unit
         {
             //Arrange
             var newTitle = "Modified Title";
-            var expected = _mapper.Map<DM.Post>(_context.Posts.First(x => x.Id == 1));
+            var expected = _mapper.Map<DM.Post>(_context.Posts.First());
             expected.Title = newTitle;
 
             //Act
@@ -178,7 +188,7 @@ namespace Reakt.Application.Tests.Unit
         {
             //Arrange
             var newTitle = "Modified Title";
-            var expected = _mapper.Map<DM.Post>(_context.Posts.First(x => x.Id == 1));
+            var expected = _mapper.Map<DM.Post>(_context.Posts.First());
             expected.Title = newTitle;
 
             //Act

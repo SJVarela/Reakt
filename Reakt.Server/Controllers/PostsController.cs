@@ -71,7 +71,9 @@ namespace Reakt.Server.Controllers
             {
                 var post = await _postService.GetAsync(id);
                 if (post == null)
+                {
                     return NotFound();
+                }
                 await _postService.DeleteAsync(id);
                 return Ok();
             }
@@ -117,7 +119,9 @@ namespace Reakt.Server.Controllers
             {
                 var post = await _postService.GetAsync(id);
                 if (post == null)
+                {
                     return NotFound();
+                }
                 return Ok(_mapper.Map<Post>(post));
             }
             catch (Exception ex)
@@ -131,8 +135,8 @@ namespace Reakt.Server.Controllers
         /// Get all Posts for a Board
         /// </summary>
         /// <param name="boardId">Board identifier</param>
-        /// <param name="startRange">Pagination start index</param>
-        /// <param name="endRange">Pagination end index</param>
+        /// <param name="startRange">Number of the item to start at</param>
+        /// <param name="endRange">Number of the item to finish at</param>
         /// <returns>List of Posts</returns>
         [Route("boards/{boardId}/posts")]
         [HttpGet]
@@ -140,13 +144,17 @@ namespace Reakt.Server.Controllers
         public async Task<ActionResult<IEnumerable<Post>>> GetForBoardAsync([FromRoute] long boardId, int startRange = 0, int endRange = 50)
         {
             if (startRange > endRange)
+            {
                 return BadRequest("Pagination values are not valid");
+            }
 
             try
             {
                 var posts = await _postService.GetForBoardAsync(boardId, startRange, endRange);
                 if (posts == null)
+                {
                     return NotFound();
+                }
                 return Ok(_mapper.Map<IEnumerable<Post>>(posts));
             }
             catch (Exception ex)
@@ -171,7 +179,9 @@ namespace Reakt.Server.Controllers
             {
                 var post = await _postService.GetAsync(id);
                 if (post == null)
+                {
                     return NotFound();
+                }
                 patchDocument.ApplyTo(post);
                 var updatedPost = await _postService.UpdateAsync(post);
                 return Ok(_mapper.Map<Post>(updatedPost));

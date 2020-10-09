@@ -46,12 +46,10 @@ namespace Reakt.Application.Services
         /// </summary>
         /// <param name="entity">Post properties</param>
         /// <returns>Not implemented exception</returns>
-        public async Task<Post> CreateAsync(Post entity)
+        public Task<Post> CreateAsync(Post entity)
         {
             //No way to create a post without a board
-            await Task.Run(() => throw new NotImplementedException());
-
-            return null;
+            throw new NotImplementedException();
         }
 
         /// <summary>

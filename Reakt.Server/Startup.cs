@@ -77,18 +77,6 @@ namespace Reakt.Server
                 .AddNewtonsoftJson();
             //For testing!
             services.AddCors(opt => opt.AddDefaultPolicy(builder => builder.AllowAnyOrigin()));
-            /*
-            services.AddCors(options =>
-            {
-                options.AddDefaultPolicy(builder =>
-                {
-                    builder
-                    .WithOrigins(Configuration.GetValue<string>("URLWeb"))
-                    .AllowAnyHeader()
-                    .AllowAnyMethod();
-                });
-            });
-            */
 
             //DI services
             services.AddScoped<ICommentService, CommentService>();
@@ -97,7 +85,7 @@ namespace Reakt.Server
 
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo() { Title = "Reakt API", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Reakt API", Version = "v1" });
                 // Set the comments path for the Swagger JSON and UI.
                 var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);

@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using AutoFixture;
+using AutoMapper;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
@@ -8,13 +9,14 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
 using Reakt.Application.Contracts.Interfaces;
-using Reakt.Domain.Models;
 using Reakt.Server.Controllers;
 using Reakt.Server.MapperConfig;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using DM = Reakt.Domain.Models;
+using SM = Reakt.Server.Models;
 
 namespace Reakt.Server.Tests.Unit
 {
@@ -22,20 +24,9 @@ namespace Reakt.Server.Tests.Unit
     public class CommentControllerTests
     {
         private readonly Mock<ICommentService> _commentService = new Mock<ICommentService>();
-
         private readonly Mock<ILogger<CommentsController>> _logger = new Mock<ILogger<CommentsController>>();
-
-        private readonly List<Comment> _mockData = new List<Comment>()
-        {
-            new Comment()
-            {
-                Id = 1,
-                Message = "Test message",
-                Likes = 3
-            }
-        };
-
         private CommentsController _commentsController;
+        private Fixture _fixture;
         private IMapper _mapper;
 
         [Test]
@@ -62,17 +53,21 @@ namespace Reakt.Server.Tests.Unit
         public async Task Get_by_Id_Should_Return_OkResults()
         {
             //Arrange
-            var id = 1;
-            var expected = _mapper.Map<Server.Models.Comment>(_mockData.First(b => b.Id == id));
-            _commentService.Setup(s => s.GetAsync(It.IsAny<long>()))
-                           .ReturnsAsync((long c) => { return _mockData.First(x => x.Id == c); });
+            var id = 5;
+            var expected = _fixture.Build<DM.Comment>()
+                                   .With(x => x.Id, id)
+                                   .Without(x => x.Parent)
+                                   .Create();
+
+            _commentService.Setup(s => s.GetAsync(id))
+                           .ReturnsAsync(expected);
 
             //Act
             var result = (await _commentsController.GetAsync(id)).Result as OkObjectResult;
 
             //Assert
             result.StatusCode.Should().Be(StatusCodes.Status200OK);
-            result.Value.Should().BeEquivalentTo(expected);
+            result.Value.Should().BeEquivalentTo(_mapper.Map<SM.Comment>(expected));
         }
 
         [Test]
@@ -94,14 +89,15 @@ namespace Reakt.Server.Tests.Unit
         public async Task Get_For_Post_Should_Return_Results()
         {
             //Arrange
-            var expected = _mapper.Map<List<Server.Models.Comment>>(_mockData);
+            var serviceResult = _fixture.CreateMany<DM.Comment>(10);
+
             _commentService.Setup(s => s.GetForPostAsync(It.IsAny<long>(), It.IsAny<int>(), It.IsAny<int>()))
-                           .ReturnsAsync(_mockData);
+                           .ReturnsAsync(serviceResult);
             //Act
             var result = (await _commentsController.GetForPostAsync(1)).Result as OkObjectResult;
 
             //Assert
-            result.Value.Should().BeEquivalentTo(expected);
+            result.Value.Should().BeEquivalentTo(_mapper.Map<IEnumerable<SM.Comment>>(serviceResult));
         }
 
         [OneTimeSetUp]
@@ -109,6 +105,10 @@ namespace Reakt.Server.Tests.Unit
         {
             _mapper = new Mapper(new MapperConfiguration(conf => conf.AddProfile(new CommentProfile())));
             _commentsController = new CommentsController(_logger.Object, _commentService.Object, _mapper);
+            _fixture = new Fixture();
+            _fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList()
+                             .ForEach(b => _fixture.Behaviors.Remove(b));
+            _fixture.Behaviors.Add(new OmitOnRecursionBehavior());//recursionDepth
         }
 
         [Test(Description = "Update should update values")]
@@ -117,10 +117,10 @@ namespace Reakt.Server.Tests.Unit
             //Arrange
             var patchDocument = new JsonPatchDocument();
             patchDocument.Operations.Add(new Operation("add", "/message", "", "New message"));
-            var comment = _mockData.First();
+            var comment = _fixture.Create<DM.Comment>();
             patchDocument.ApplyTo(comment);
 
-            _commentService.Setup(x => x.UpdateAsync(It.IsAny<Comment>())).ReturnsAsync(comment);
+            _commentService.Setup(x => x.UpdateAsync(It.IsAny<DM.Comment>())).ReturnsAsync(comment);
             _commentService.Setup(x => x.GetAsync(It.IsAny<long>())).ReturnsAsync(comment);
             //Act
             var result = (await _commentsController.UpdateAsync(1, patchDocument)).Result as OkObjectResult;
