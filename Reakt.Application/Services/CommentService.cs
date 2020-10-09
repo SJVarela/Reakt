@@ -96,7 +96,10 @@ namespace Reakt.Application.Services
             var storedComment = _mapper.Map<PM.Comment>(comment);
             storedComment.ParentId = parentComment.Id;
             storedComment.PostId = parentComment.PostId;
+
             storedComment = _dbContext.Comments.Add(storedComment).Entity;
+            parentComment.ReplyCount++;
+
             await _dbContext.SaveChangesAsync();
             return _mapper.Map<DM.Comment>(storedComment);
         }

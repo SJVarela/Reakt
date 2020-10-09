@@ -6,6 +6,7 @@ namespace Reakt.Application.Persistence
     {
         public DateTime CreatedAt { get; set; }
         public DateTime? DeletedAt { get; set; }
+        public DateTime? EditedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
     }
 }
