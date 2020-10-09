@@ -10,6 +10,10 @@ namespace Reakt.Application.Contracts.Interfaces
 
         Task<IEnumerable<Comment>> GetForPostAsync(long postId, int startRange, int endRange);
 
+        Task<IEnumerable<Comment>> GetRepliesAsync(long parentId, int startRange, int endRange);
+
         void Like(long id);
+
+        Task<Comment> ReplyAsync(long id, Comment comment);
     }
 }

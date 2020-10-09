@@ -24,11 +24,11 @@ namespace Reakt.Server.Models
         /// <summary>
         /// Replies to this comment
         /// </summary>
-        public IEnumerable<Comment> Replies { get; set; }
+        public IEnumerable<Comment> Replies { get; private set; }
 
         /// <summary>
         /// Number of replies to this comment
         /// </summary>
-        public int ReplyCount { get; set; }
+        public int ReplyCount { get; private set; }
     }
 }
