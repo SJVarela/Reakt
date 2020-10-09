@@ -149,8 +149,8 @@ namespace Reakt.Application.Tests.Unit
         public void GetForBoard_Should_Return_Results()
         {
             //Arrange
-            var boardId = 1;
-            var expected = _mapper.Map<List<DM.Post>>(_context.Posts);
+            var boardId = _context.Posts.Max(b => b.BoardId);
+            var expected = _mapper.Map<List<DM.Post>>(_context.Posts.Where(x => x.BoardId == boardId));
 
             //Act
             var result = _postService.GetForBoardAsync(boardId, 0, 50).Result;
