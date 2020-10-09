@@ -30,10 +30,10 @@ namespace Reakt.Application.Tests.Unit
             //Arrange
             var boardId = 1;
             var post = _fixture.Build<DM.Post>()
-                               .With(p => p.BoardId, boardId)
                                .With(p => p.Id, 0)
                                .Without(p => p.Comments)
                                .Create();
+
             //Act
             var result = _postService.AddAsync(boardId, post).Result;
 
@@ -47,7 +47,6 @@ namespace Reakt.Application.Tests.Unit
             //Arrange
             var boardId = 1;
             var post = _fixture.Build<DM.Post>()
-                               .With(p => p.BoardId, boardId)
                                .With(p => p.Id, 0)
                                .Without(p => p.Comments)
                                .Create();
@@ -150,7 +149,7 @@ namespace Reakt.Application.Tests.Unit
         public void GetForBoard_Should_Return_Results()
         {
             //Arrange
-            var boardId = 1;
+            var boardId = _context.Posts.Max(b => b.BoardId);
             var expected = _mapper.Map<List<DM.Post>>(_context.Posts.Where(x => x.BoardId == boardId));
 
             //Act
