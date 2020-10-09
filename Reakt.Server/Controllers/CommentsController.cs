@@ -28,7 +28,7 @@ namespace Reakt.Server.Controllers
         /// <param name="logger"></param>
         /// <param name="commentService"></param>
         /// <param name="mapper"></param>
-        public CommentsController(ILogger<CommentsController> logger, ICommentService commentService, IMapper mapper)
+        public CommentsController(ICommentService commentService, ILogger<CommentsController> logger, IMapper mapper)
         {
             _logger = logger;
             _commentService = commentService;

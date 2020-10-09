@@ -104,7 +104,7 @@ namespace Reakt.Server.Tests.Unit
         public void Setup()
         {
             _mapper = new Mapper(new MapperConfiguration(conf => conf.AddProfile(new CommentProfile())));
-            _commentsController = new CommentsController(_logger.Object, _commentService.Object, _mapper);
+            _commentsController = new CommentsController(_commentService.Object, _logger.Object, _mapper);
             _fixture = new Fixture();
             _fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList()
                              .ForEach(b => _fixture.Behaviors.Remove(b));
