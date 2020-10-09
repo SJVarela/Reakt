@@ -11,7 +11,6 @@ using Reakt.Application.Services;
 using Reakt.Persistance.DependencyInjection;
 using System;
 using System.IO;
-using System.Reflection;
 
 namespace Reakt.Server
 {
@@ -87,7 +86,7 @@ namespace Reakt.Server
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Reakt API", Version = "v1" });
                 // Set the comments path for the Swagger JSON and UI.
-                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlFile = $"{typeof(Startup).Assembly.GetName().Name}.xml";
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
                 c.IncludeXmlComments(xmlPath);
             });

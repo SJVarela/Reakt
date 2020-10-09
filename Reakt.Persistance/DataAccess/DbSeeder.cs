@@ -28,7 +28,7 @@ namespace Reakt.Persistance.DataAccess
                 PostId = 1,
                 Message = "This post sucks"
             },
-            new Comment()
+            new Comment
             {
                 Id = 2,
                 PostId = 1,
