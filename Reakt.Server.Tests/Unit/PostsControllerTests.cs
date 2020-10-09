@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.JsonPatch.Operations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -21,35 +23,58 @@ namespace Reakt.Server.Tests.Unit
     {
         private readonly Mock<ILogger<PostsController>> _logger = new Mock<ILogger<PostsController>>();
 
-        private readonly List<Post> _mockData = new List<Post>()
+        private readonly List<Post> _mockData = new List<Post>
         {
             new Post()
             {
                 Id = 1,
                 Title = "Test post",
                 Description = "A test description",
-                BoardId = 1,
-                CreatedAt = DateTime.Now
+                CreatedAt = DateTime.Now,
+                Comments = new List<Comment>()
             },
             new Post()
             {
                 Id = 2,
                 Title = "Test 2 post",
                 Description = "A test2 description",
-                BoardId = 1,
-                CreatedAt = DateTime.Now
+                CreatedAt = DateTime.Now,
+                Comments = new List<Comment>()
             }
-    };
+        };
 
-        private readonly Mock<IPostService> _postService = new Mock<IPostService>();
+        private readonly Mock<IPostService> _postsService = new Mock<IPostService>();
         private IMapper _mapper;
         private PostsController _postsController;
+
+        [Test]
+        public async Task AddAsync_Error_Should_Return_ServerError_LogError()
+        {
+            //Arrange
+            _postsService.Setup(x => x.AddAsync(It.IsAny<long>(), It.IsAny<Post>()))
+                        .Throws<Exception>();
+
+            //Act
+            var result = (await _postsController.AddAsync(1, new Models.Post())).Result;
+
+            //Assert
+            result.Should().BeOfType<StatusCodeResult>();
+            (result as StatusCodeResult).StatusCode.Should().Be(StatusCodes.Status500InternalServerError);
+
+            _logger.Verify(x => x.Log(It.IsAny<LogLevel>(),
+                                      It.IsAny<EventId>(),
+                                      It.IsAny<It.IsAnyType>(),
+                                      It.IsAny<Exception>(),
+                                      (Func<It.IsAnyType, Exception, string>)It.IsAny<object>()));
+        }
+
+        //TODO: AddAsync should return created item
 
         [Test]
         public async Task Get_Error_Should_Return_ServerError_LogError()
         {
             //Arrange
-            _postService.Setup(x => x.GetAsync())
+            _postsService.Setup(x => x.GetAsync())
                         .Throws<Exception>();
 
             //Act
@@ -70,9 +95,8 @@ namespace Reakt.Server.Tests.Unit
         public async Task Get_Should_Return_Ok_Result()
         {
             //Arrange
-            var id = 1;
             var expected = _mapper.Map<List<Server.Models.Post>>(_mockData);
-            _postService.Setup(s => s.GetAsync())
+            _postsService.Setup(s => s.GetAsync())
                            .ReturnsAsync(() => { return _mockData; });
 
             //Act
@@ -87,7 +111,7 @@ namespace Reakt.Server.Tests.Unit
         public async Task GetById_Error_Should_Return_ServerError_LogError()
         {
             //Arrange
-            _postService.Setup(x => x.GetAsync(It.IsAny<long>()))
+            _postsService.Setup(x => x.GetAsync(It.IsAny<long>()))
                         .Throws<Exception>();
 
             //Act
@@ -110,7 +134,7 @@ namespace Reakt.Server.Tests.Unit
             //Arrange
             var id = 1;
             var expected = _mapper.Map<Server.Models.Post>(_mockData.First(b => b.Id == id));
-            _postService.Setup(s => s.GetAsync(It.IsAny<long>()))
+            _postsService.Setup(s => s.GetAsync(It.IsAny<long>()))
                            .ReturnsAsync((long c) => { return _mockData.First(x => x.Id == c); });
 
             //Act
@@ -125,7 +149,7 @@ namespace Reakt.Server.Tests.Unit
         public async Task GetById_Wrong_Id_Should_Return_NotFound()
         {
             //Arrange
-            _postService.Setup(s => s.GetAsync(It.IsAny<long>()))
+            _postsService.Setup(s => s.GetAsync(It.IsAny<long>()))
                            .ReturnsAsync((long c) => { return null; });
 
             //Act
@@ -140,9 +164,9 @@ namespace Reakt.Server.Tests.Unit
         public async Task GetForBoard_Should_Return_Results()
         {
             //Arrange
-            var expected = _mapper.Map<List<Server.Models.Post>>(_mockData.Where(x => x.BoardId == 1));
-            _postService.Setup(s => s.GetForBoardAsync(It.IsAny<long>(), It.IsAny<int>(), It.IsAny<int>()))
-                           .ReturnsAsync(_mockData.Where(x => x.BoardId == 1));
+            var expected = _mapper.Map<List<Server.Models.Post>>(_mockData);
+            _postsService.Setup(s => s.GetForBoardAsync(It.IsAny<long>(), It.IsAny<int>(), It.IsAny<int>()))
+                           .ReturnsAsync(_mockData);
             //Act
             var result = (await _postsController.GetForBoardAsync(1)).Result as OkObjectResult;
 
@@ -151,15 +175,29 @@ namespace Reakt.Server.Tests.Unit
             result.Value.Should().BeEquivalentTo(expected);
         }
 
-        /// <summary>
-        /// TODO: AddAsync, DeleteAsync, UpdateAsync
-        /// </summary>
-
         [SetUp]
         public void Setup()
         {
             _mapper = new Mapper(new MapperConfiguration(conf => conf.AddProfile(new PostProfile())));
-            _postsController = new PostsController(_postService.Object, _logger.Object, _mapper);
+            _postsController = new PostsController(_postsService.Object, _logger.Object, _mapper);
+        }
+
+        [Test]
+        public async Task UpdateAsync_Should_Return_UpdatedValues()
+        {
+            //Arrange
+            var patchDocument = new JsonPatchDocument();
+            patchDocument.Operations.Add(new Operation("add", "/description", "", "New post description"));
+            var post = _mockData.First();
+            patchDocument.ApplyTo(post);
+
+            _postsService.Setup(x => x.UpdateAsync(It.IsAny<Post>())).ReturnsAsync(post);
+            _postsService.Setup(x => x.GetAsync(It.IsAny<long>())).ReturnsAsync(post);
+
+            //Act
+            var result = (await _postsController.UpdateAsync(1, patchDocument)).Result as OkObjectResult;
+            //Assert
+            result.Value.Should().BeEquivalentTo(post);
         }
     }
 }

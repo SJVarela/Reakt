@@ -116,7 +116,6 @@ namespace Reakt.Application.Tests.Unit
             {
                 Title = "new created",
                 Description = "new created",
-                BoardId = boardId,
                 Comments = new List<Domain.Models.Comment>()
             };
 
@@ -136,7 +135,6 @@ namespace Reakt.Application.Tests.Unit
             {
                 Title = "new created",
                 Description = "new created",
-                BoardId = boardId,
                 Comments = new List<Domain.Models.Comment>()
             };
 
