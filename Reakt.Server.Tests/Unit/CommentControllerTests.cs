@@ -114,13 +114,13 @@ namespace Reakt.Server.Tests.Unit
         public async Task UpdateAsync_Should_Return_UpdatedValues()
         {
             //Arrange
-            var patchDocument = new JsonPatchDocument();
-            patchDocument.Operations.Add(new Operation("add", "/message", "", "New message"));
-            var comment = _fixture.Create<DM.Comment>();
+            var patchDocument = new JsonPatchDocument<SM.Comment>();
+            patchDocument.Operations.Add(new Operation<SM.Comment>("add", "/message", "", "New message"));
+            var comment = _fixture.Create<SM.Comment>();
             patchDocument.ApplyTo(comment);
 
-            _commentService.Setup(x => x.UpdateAsync(It.IsAny<DM.Comment>())).ReturnsAsync(comment);
-            _commentService.Setup(x => x.GetAsync(It.IsAny<long>())).ReturnsAsync(comment);
+            _commentService.Setup(x => x.UpdateAsync(It.IsAny<DM.Comment>())).ReturnsAsync(_mapper.Map<DM.Comment>(comment));
+            _commentService.Setup(x => x.GetAsync(It.IsAny<long>())).ReturnsAsync(_mapper.Map<DM.Comment>(comment));
             //Act
             var result = (await _commentsController.UpdateAsync(1, patchDocument)).Result as OkObjectResult;
             //Assert

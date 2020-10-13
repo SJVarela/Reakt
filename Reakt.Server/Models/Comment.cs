@@ -24,7 +24,7 @@ namespace Reakt.Server.Models
         /// <summary>
         /// Replies to this comment
         /// </summary>
-        public IEnumerable<Comment> Replies { get; private set; }
+        public IEnumerable<Comment> Replies { get; private set; } = new List<Comment>();
 
         /// <summary>
         /// Number of replies to this comment
