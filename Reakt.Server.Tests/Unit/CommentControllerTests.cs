@@ -1,6 +1,7 @@
 ﻿using AutoFixture;
 using AutoMapper;
 using FluentAssertions;
+using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.JsonPatch.Operations;
@@ -25,6 +26,7 @@ namespace Reakt.Server.Tests.Unit
     {
         private readonly Mock<ICommentService> _commentService = new Mock<ICommentService>();
         private readonly Mock<ILogger<CommentsController>> _logger = new Mock<ILogger<CommentsController>>();
+        private readonly Mock<IMediator> _mediator = new Mock<IMediator>();
         private CommentsController _commentsController;
         private Fixture _fixture;
         private IMapper _mapper;
@@ -90,7 +92,7 @@ namespace Reakt.Server.Tests.Unit
             //Arrange
             var serviceResult = _fixture.CreateMany<DM.Comment>(10);
 
-            _commentService.Setup(s => s.GetForPostAsync(It.IsAny<long>(), It.IsAny<int>(), It.IsAny<int>()))
+            _commentService.Setup(s => s.GetForPostAsync(It.IsAny<long>(), It.IsAny<int>(), It.IsAny<int>(), null))
                            .ReturnsAsync(serviceResult);
             //Act
             var result = (await _commentsController.GetForPostAsync(1)).Result as OkObjectResult;
@@ -103,7 +105,7 @@ namespace Reakt.Server.Tests.Unit
         public void Setup()
         {
             _mapper = new Mapper(new MapperConfiguration(conf => conf.AddProfile(new CommentProfile())));
-            _commentsController = new CommentsController(_commentService.Object, _logger.Object, _mapper);
+            _commentsController = new CommentsController(_commentService.Object, _logger.Object, _mapper, _mediator.Object);
             _fixture = new Fixture();
             _fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList()
                              .ForEach(b => _fixture.Behaviors.Remove(b));

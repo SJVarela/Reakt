@@ -2,10 +2,13 @@
 using Microsoft.EntityFrameworkCore;
 using Reakt.Application.Contracts.Interfaces;
 using Reakt.Application.Persistence;
+using Reakt.Application.Persistence.Extensions;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using DM = Reakt.Domain.Models;
+
 using PM = Reakt.Application.Persistence.Models;
 
 namespace Reakt.Application.Services
@@ -22,12 +25,12 @@ namespace Reakt.Application.Services
             _mapper = mapper;
         }
 
-        public async Task<DM.Comment> AddCommentAsync(long postId, DM.Comment comment)
+        public async Task<DM.Comment> AddCommentAsync(long postId, DM.Comment comment, CancellationToken? cancellationToken)
         {
             var storedComment = _mapper.Map<PM.Comment>(comment);
             storedComment.PostId = postId;
             storedComment = _dbContext.Comments.Add(storedComment).Entity;
-            await _dbContext.SaveChangesAsync();
+            await _dbContext.SaveChangesAsync(cancellationToken ?? new CancellationToken());
             return _mapper.Map<DM.Comment>(storedComment);
         }
 
@@ -53,17 +56,17 @@ namespace Reakt.Application.Services
             return _mapper.Map<DM.Comment>(result);
         }
 
-        public async Task<IEnumerable<DM.Comment>> GetForPostAsync(long postId, int startRange, int endRange)
+        public async Task<IEnumerable<DM.Comment>> GetForPostAsync(long postId, int startRange, int endRange, string orderBy, CancellationToken? cancellationToken)
         {
             var result = await _dbContext.Comments.Where(c => c.PostId == postId && c.ParentId == null)
-                                         .OrderByDescending(c => c.CreatedAt)
-                                         .Skip(startRange)
-                                         .Take(endRange - startRange)
-                                         .ToListAsync();
+                                                  .OrderByField(orderBy, false)
+                                                  .Skip(startRange)
+                                                  .Take(endRange - startRange)
+                                                  .ToListAsync(cancellationToken ?? new CancellationToken());
             return _mapper.Map<IEnumerable<DM.Comment>>(result);
         }
 
-        public async Task<IEnumerable<DM.Comment>> GetRepliesAsync(long parentId, int startRange, int endRange)
+        public async Task<IEnumerable<DM.Comment>> GetRepliesAsync(long parentId, int startRange, int endRange, CancellationToken? cancellationToken)
         {
             var comment = await _dbContext.Comments.FirstOrDefaultAsync(c => c.Id == parentId);
             if (comment is null)
@@ -77,7 +80,7 @@ namespace Reakt.Application.Services
                 .OrderBy(c => c.CreatedAt)
                 .Skip(startRange)
                 .Take(endRange - startRange)
-                .ToListAsync());
+                .ToListAsync(cancellationToken ?? new CancellationToken()));
         }
 
         public void Like(long id)
@@ -85,7 +88,7 @@ namespace Reakt.Application.Services
             throw new System.NotImplementedException();
         }
 
-        public async Task<DM.Comment> ReplyAsync(long id, DM.Comment comment)
+        public async Task<DM.Comment> ReplyAsync(long id, DM.Comment comment, CancellationToken? cancellationToken)
         {
             var parentComment = await _dbContext.Comments.FirstOrDefaultAsync(c => c.Id == id);
             if (parentComment is null)
@@ -100,7 +103,7 @@ namespace Reakt.Application.Services
             storedComment = _dbContext.Comments.Add(storedComment).Entity;
             parentComment.ReplyCount++;
 
-            await _dbContext.SaveChangesAsync();
+            await _dbContext.SaveChangesAsync(cancellationToken ?? new CancellationToken());
             return _mapper.Map<DM.Comment>(storedComment);
         }
 

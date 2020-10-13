@@ -32,7 +32,7 @@ namespace Reakt.Application.Tests.Unit
                                    .With(c => c.Id, 0)
                                    .Create();
             //Act
-            var result = _commentService.AddCommentAsync(1, expected).Result;
+            var result = _commentService.AddCommentAsync(1, expected, null).Result;
             expected.CreatedAt = result.CreatedAt;
             expected.Id = result.Id;
             //Arrange
