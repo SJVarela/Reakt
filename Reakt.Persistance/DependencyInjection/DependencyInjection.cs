@@ -24,8 +24,9 @@ namespace Reakt.Persistance.DependencyInjection
             services.AddDbContext<ReaktDbContext>(options =>
                 options.UseSqlServer(configuration.GetConnectionString("ReaktDbConnection"))
                 .UseLoggerFactory(MyLoggerFactory));
-
             services.AddScoped<IReaktDbContext>(provider => provider.GetService<ReaktDbContext>());
+
+            services.BuildServiceProvider().GetService<ReaktDbContext>().Database.EnsureCreated();
 
             return services;
         }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Reakt.Application.Persistence.Models;
+using System;
 
 namespace Reakt.Persistance.DataAccess
 {
@@ -26,14 +27,28 @@ namespace Reakt.Persistance.DataAccess
             {
                 Id = 1,
                 PostId = 1,
-                Message = "This post sucks"
+                Message = "This post sucks",
+                ParentId = null,
+                Active = true,
+                CreatedAt = DateTime.Now
             },
-            new Comment()
+            new Comment
             {
                 Id = 2,
                 PostId = 1,
-                Message = "You suck",
-                ParentId = 1
+                Message = "This post is good",
+                ParentId = null,
+                Active = true,
+                CreatedAt = DateTime.Now,
+            },
+            new Comment
+            {
+                Id = 3,
+                PostId = 1,
+                Message = "This comment is good",
+                ParentId = 1,
+                Active = true,
+                CreatedAt = DateTime.Now
             });
         }
     }

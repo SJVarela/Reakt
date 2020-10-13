@@ -11,7 +11,7 @@ namespace Reakt.Server.Models
         /// <summary>
         /// Post comments
         /// </summary>
-        public List<Comment> Comments { get; set; }
+        public IEnumerable<Comment> Comments { get; set; }
 
         /// <summary>
         /// Post description

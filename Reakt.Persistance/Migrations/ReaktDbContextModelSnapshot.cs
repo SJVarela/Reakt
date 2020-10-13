@@ -97,6 +97,9 @@ namespace Reakt.Persistance.Migrations
                     b.Property<long>("PostId")
                         .HasColumnType("bigint");
 
+                    b.Property<int>("ReplyCount")
+                        .HasColumnType("int");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
@@ -112,21 +115,33 @@ namespace Reakt.Persistance.Migrations
                         new
                         {
                             Id = 1L,
-                            Active = false,
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Active = true,
+                            CreatedAt = new DateTime(2020, 10, 9, 15, 26, 19, 486, DateTimeKind.Local).AddTicks(1974),
                             Likes = 0,
                             Message = "This post sucks",
-                            PostId = 1L
+                            PostId = 1L,
+                            ReplyCount = 0
                         },
                         new
                         {
                             Id = 2L,
-                            Active = false,
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Active = true,
+                            CreatedAt = new DateTime(2020, 10, 9, 15, 26, 19, 487, DateTimeKind.Local).AddTicks(1217),
                             Likes = 0,
-                            Message = "You suck",
+                            Message = "This post is good",
+                            PostId = 1L,
+                            ReplyCount = 0
+                        },
+                        new
+                        {
+                            Id = 3L,
+                            Active = true,
+                            CreatedAt = new DateTime(2020, 10, 9, 15, 26, 19, 487, DateTimeKind.Local).AddTicks(1244),
+                            Likes = 0,
+                            Message = "This comment is good",
                             ParentId = 1L,
-                            PostId = 1L
+                            PostId = 1L,
+                            ReplyCount = 0
                         });
                 });
 
@@ -184,8 +199,8 @@ namespace Reakt.Persistance.Migrations
 
             modelBuilder.Entity("Reakt.Application.Persistence.Models.Comment", b =>
                 {
-                    b.HasOne("Reakt.Application.Persistence.Models.Comment", "Parent")
-                        .WithMany()
+                    b.HasOne("Reakt.Application.Persistence.Models.Comment", null)
+                        .WithMany("Replies")
                         .HasForeignKey("ParentId");
 
                     b.HasOne("Reakt.Application.Persistence.Models.Post", null)

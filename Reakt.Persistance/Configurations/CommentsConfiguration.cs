@@ -9,10 +9,15 @@ namespace Reakt.Persistance.Configurations
         public void Configure(EntityTypeBuilder<Comment> builder)
         {
             builder.Property(e => e.Id)
-                .UseIdentityColumn();
+                   .UseIdentityColumn();
+
             builder.Property(e => e.Message)
-                .IsRequired()
-                .HasMaxLength(4000);
+                   .IsRequired()
+                   .HasMaxLength(4000);
+
+            builder.HasMany(e => e.Replies)
+                   .WithOne()
+                   .HasForeignKey(e => e.ParentId);
 
             builder.HasQueryFilter(x => x.Active);
         }

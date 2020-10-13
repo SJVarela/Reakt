@@ -56,7 +56,6 @@ namespace Reakt.Server.Tests.Unit
             var id = 5;
             var expected = _fixture.Build<DM.Comment>()
                                    .With(x => x.Id, id)
-                                   .Without(x => x.Parent)
                                    .Create();
 
             _commentService.Setup(s => s.GetAsync(id))
@@ -104,7 +103,7 @@ namespace Reakt.Server.Tests.Unit
         public void Setup()
         {
             _mapper = new Mapper(new MapperConfiguration(conf => conf.AddProfile(new CommentProfile())));
-            _commentsController = new CommentsController(_logger.Object, _commentService.Object, _mapper);
+            _commentsController = new CommentsController(_commentService.Object, _logger.Object, _mapper);
             _fixture = new Fixture();
             _fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList()
                              .ForEach(b => _fixture.Behaviors.Remove(b));
@@ -115,13 +114,13 @@ namespace Reakt.Server.Tests.Unit
         public async Task UpdateAsync_Should_Return_UpdatedValues()
         {
             //Arrange
-            var patchDocument = new JsonPatchDocument();
-            patchDocument.Operations.Add(new Operation("add", "/message", "", "New message"));
-            var comment = _fixture.Create<DM.Comment>();
+            var patchDocument = new JsonPatchDocument<SM.Comment>();
+            patchDocument.Operations.Add(new Operation<SM.Comment>("add", "/message", "", "New message"));
+            var comment = _fixture.Create<SM.Comment>();
             patchDocument.ApplyTo(comment);
 
-            _commentService.Setup(x => x.UpdateAsync(It.IsAny<DM.Comment>())).ReturnsAsync(comment);
-            _commentService.Setup(x => x.GetAsync(It.IsAny<long>())).ReturnsAsync(comment);
+            _commentService.Setup(x => x.UpdateAsync(It.IsAny<DM.Comment>())).ReturnsAsync(_mapper.Map<DM.Comment>(comment));
+            _commentService.Setup(x => x.GetAsync(It.IsAny<long>())).ReturnsAsync(_mapper.Map<DM.Comment>(comment));
             //Act
             var result = (await _commentsController.UpdateAsync(1, patchDocument)).Result as OkObjectResult;
             //Assert

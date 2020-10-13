@@ -1,22 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
-using System;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Reakt.Persistance.Migrations
 {
-    public partial class auditable : Migration
+    public partial class Initial : Migration
     {
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.DropTable(
-                name: "Comments");
-
-            migrationBuilder.DropTable(
-                name: "Posts");
-
-            migrationBuilder.DropTable(
-                name: "Boards");
-        }
-
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
@@ -27,10 +15,10 @@ namespace Reakt.Persistance.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Active = table.Column<bool>(nullable: false),
                     CreatedAt = table.Column<DateTime>(nullable: false),
-                    UpdatedAt = table.Column<DateTime>(nullable: true),
                     DeletedAt = table.Column<DateTime>(nullable: true),
-                    Title = table.Column<string>(maxLength: 200, nullable: false),
-                    Description = table.Column<string>(maxLength: 600, nullable: false)
+                    UpdatedAt = table.Column<DateTime>(nullable: true),
+                    Description = table.Column<string>(maxLength: 600, nullable: false),
+                    Title = table.Column<string>(maxLength: 200, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -45,11 +33,11 @@ namespace Reakt.Persistance.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Active = table.Column<bool>(nullable: false),
                     CreatedAt = table.Column<DateTime>(nullable: false),
-                    UpdatedAt = table.Column<DateTime>(nullable: true),
                     DeletedAt = table.Column<DateTime>(nullable: true),
-                    Title = table.Column<string>(maxLength: 200, nullable: false),
+                    UpdatedAt = table.Column<DateTime>(nullable: true),
+                    BoardId = table.Column<long>(nullable: false),
                     Description = table.Column<string>(maxLength: 600, nullable: false),
-                    BoardId = table.Column<long>(nullable: true)
+                    Title = table.Column<string>(maxLength: 200, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -59,7 +47,7 @@ namespace Reakt.Persistance.Migrations
                         column: x => x.BoardId,
                         principalTable: "Boards",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -70,12 +58,13 @@ namespace Reakt.Persistance.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Active = table.Column<bool>(nullable: false),
                     CreatedAt = table.Column<DateTime>(nullable: false),
-                    UpdatedAt = table.Column<DateTime>(nullable: true),
                     DeletedAt = table.Column<DateTime>(nullable: true),
+                    UpdatedAt = table.Column<DateTime>(nullable: true),
+                    Likes = table.Column<int>(nullable: false),
                     Message = table.Column<string>(maxLength: 4000, nullable: false),
                     ParentId = table.Column<long>(nullable: true),
-                    Likes = table.Column<int>(nullable: false),
-                    PostId = table.Column<long>(nullable: true)
+                    PostId = table.Column<long>(nullable: false),
+                    ReplyCount = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -91,8 +80,33 @@ namespace Reakt.Persistance.Migrations
                         column: x => x.PostId,
                         principalTable: "Posts",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.InsertData(
+                table: "Boards",
+                columns: new[] { "Id", "Active", "CreatedAt", "DeletedAt", "Description", "Title", "UpdatedAt" },
+                values: new object[] { 1L, false, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, "This is a seeded board", "Seed bored", null });
+
+            migrationBuilder.InsertData(
+                table: "Posts",
+                columns: new[] { "Id", "Active", "BoardId", "CreatedAt", "DeletedAt", "Description", "Title", "UpdatedAt" },
+                values: new object[] { 1L, false, 1L, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, "This is a seeded post", "Seed post", null });
+
+            migrationBuilder.InsertData(
+                table: "Comments",
+                columns: new[] { "Id", "Active", "CreatedAt", "DeletedAt", "Likes", "Message", "ParentId", "PostId", "ReplyCount", "UpdatedAt" },
+                values: new object[] { 1L, true, new DateTime(2020, 10, 9, 15, 26, 19, 486, DateTimeKind.Local).AddTicks(1974), null, 0, "This post sucks", null, 1L, 0, null });
+
+            migrationBuilder.InsertData(
+                table: "Comments",
+                columns: new[] { "Id", "Active", "CreatedAt", "DeletedAt", "Likes", "Message", "ParentId", "PostId", "ReplyCount", "UpdatedAt" },
+                values: new object[] { 2L, true, new DateTime(2020, 10, 9, 15, 26, 19, 487, DateTimeKind.Local).AddTicks(1217), null, 0, "This post is good", null, 1L, 0, null });
+
+            migrationBuilder.InsertData(
+                table: "Comments",
+                columns: new[] { "Id", "Active", "CreatedAt", "DeletedAt", "Likes", "Message", "ParentId", "PostId", "ReplyCount", "UpdatedAt" },
+                values: new object[] { 3L, true, new DateTime(2020, 10, 9, 15, 26, 19, 487, DateTimeKind.Local).AddTicks(1244), null, 0, "This comment is good", 1L, 1L, 0, null });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Comments_ParentId",
@@ -108,6 +122,18 @@ namespace Reakt.Persistance.Migrations
                 name: "IX_Posts_BoardId",
                 table: "Posts",
                 column: "BoardId");
+        }
+
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropTable(
+                name: "Comments");
+
+            migrationBuilder.DropTable(
+                name: "Posts");
+
+            migrationBuilder.DropTable(
+                name: "Boards");
         }
     }
 }

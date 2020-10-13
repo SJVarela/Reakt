@@ -8,6 +8,7 @@ using Reakt.Server.Models;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using DM = Reakt.Domain.Models;
 
 namespace Reakt.Server.Controllers
 {
@@ -28,7 +29,7 @@ namespace Reakt.Server.Controllers
         /// <param name="logger"></param>
         /// <param name="commentService"></param>
         /// <param name="mapper"></param>
-        public CommentsController(ILogger<CommentsController> logger, ICommentService commentService, IMapper mapper)
+        public CommentsController(ICommentService commentService, ILogger<CommentsController> logger, IMapper mapper)
         {
             _logger = logger;
             _commentService = commentService;
@@ -48,7 +49,7 @@ namespace Reakt.Server.Controllers
         {
             try
             {
-                var comment = _mapper.Map<Domain.Models.Comment>(commentDto);
+                var comment = _mapper.Map<DM.Comment>(commentDto);
                 return Ok(_mapper.Map<Comment>(await _commentService.AddCommentAsync(postId, comment)));
             }
             catch (Exception ex)
@@ -113,6 +114,58 @@ namespace Reakt.Server.Controllers
         }
 
         /// <summary>
+        /// Gets a comment's replies
+        /// </summary>
+        /// <param name="id">Comment unique identifier</param>
+        /// <param name="startRange">Starting item position</param>
+        /// <param name="endRange">Ending item position</param>
+        /// <returns>List of comment's replies</returns>
+        [HttpGet("comments/{id}/replies")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<IEnumerable<Comment>>> GetRepliesAsync(long id, int startRange = 0, int endRange = 50)
+        {
+            try
+            {
+                var comment = await _commentService.GetRepliesAsync(id, startRange, endRange);
+                return comment != null ? Ok(_mapper.Map<IEnumerable<Comment>>(comment)) : NotFound() as ActionResult;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+        }
+
+        /// <summary>
+        /// Adds a reply to a comment
+        /// </summary>
+        /// <param name="id">Comment identifier</param>
+        /// <param name="commentDto">Comment model</param>
+        /// <returns>The created comment</returns>
+        [HttpPost("comments/{id}/replies")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<Comment>> ReplyAsync(long id, [FromBody] Comment commentDto)
+        {
+            try
+            {
+                var comment = _mapper.Map<DM.Comment>(commentDto);
+                var createdComment = await _commentService.ReplyAsync(id, comment);
+                if (createdComment is null)
+                {
+                    return NotFound();
+                }
+                return Ok(_mapper.Map<Comment>(createdComment));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+        }
+
+        /// <summary>
         /// Update a comment
         /// </summary>
         /// <param name="id">Comment identifier</param>
@@ -121,17 +174,21 @@ namespace Reakt.Server.Controllers
         [HttpPatch("comments/{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<Comment>> UpdateAsync(long id, [FromBody] JsonPatchDocument patchDocument)
+        public async Task<ActionResult<Comment>> UpdateAsync(long id, [FromBody] JsonPatchDocument<Comment> patchDocument)
         {
             try
             {
-                var comment = await _commentService.GetAsync(id);
+                var comment = _mapper.Map<Comment>(await _commentService.GetAsync(id));
                 if (comment == null)
                 {
                     return NotFound();
                 }
-                patchDocument.ApplyTo(comment);
-                var updatedComment = await _commentService.UpdateAsync(comment);
+                patchDocument.ApplyTo(comment, ModelState);
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+                var updatedComment = await _commentService.UpdateAsync(_mapper.Map<DM.Comment>(comment));
                 return Ok(_mapper.Map<Comment>(updatedComment));
             }
             catch (Exception ex)

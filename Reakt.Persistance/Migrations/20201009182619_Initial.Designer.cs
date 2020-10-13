@@ -10,8 +10,8 @@ using Reakt.Persistance.DataAccess;
 namespace Reakt.Persistance.Migrations
 {
     [DbContext(typeof(ReaktDbContext))]
-    [Migration("20201001143009_auditable")]
-    partial class auditable
+    [Migration("20201009182619_Initial")]
+    partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -55,6 +55,16 @@ namespace Reakt.Persistance.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Boards");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1L,
+                            Active = false,
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Description = "This is a seeded board",
+                            Title = "Seed bored"
+                        });
                 });
 
             modelBuilder.Entity("Reakt.Application.Persistence.Models.Comment", b =>
@@ -86,8 +96,11 @@ namespace Reakt.Persistance.Migrations
                     b.Property<long?>("ParentId")
                         .HasColumnType("bigint");
 
-                    b.Property<long?>("PostId")
+                    b.Property<long>("PostId")
                         .HasColumnType("bigint");
+
+                    b.Property<int>("ReplyCount")
+                        .HasColumnType("int");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
@@ -99,6 +112,39 @@ namespace Reakt.Persistance.Migrations
                     b.HasIndex("PostId");
 
                     b.ToTable("Comments");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1L,
+                            Active = true,
+                            CreatedAt = new DateTime(2020, 10, 9, 15, 26, 19, 486, DateTimeKind.Local).AddTicks(1974),
+                            Likes = 0,
+                            Message = "This post sucks",
+                            PostId = 1L,
+                            ReplyCount = 0
+                        },
+                        new
+                        {
+                            Id = 2L,
+                            Active = true,
+                            CreatedAt = new DateTime(2020, 10, 9, 15, 26, 19, 487, DateTimeKind.Local).AddTicks(1217),
+                            Likes = 0,
+                            Message = "This post is good",
+                            PostId = 1L,
+                            ReplyCount = 0
+                        },
+                        new
+                        {
+                            Id = 3L,
+                            Active = true,
+                            CreatedAt = new DateTime(2020, 10, 9, 15, 26, 19, 487, DateTimeKind.Local).AddTicks(1244),
+                            Likes = 0,
+                            Message = "This comment is good",
+                            ParentId = 1L,
+                            PostId = 1L,
+                            ReplyCount = 0
+                        });
                 });
 
             modelBuilder.Entity("Reakt.Application.Persistence.Models.Post", b =>
@@ -113,7 +159,7 @@ namespace Reakt.Persistance.Migrations
                     b.Property<bool>("Active")
                         .HasColumnType("bit");
 
-                    b.Property<long?>("BoardId")
+                    b.Property<long>("BoardId")
                         .HasColumnType("bigint");
 
                     b.Property<DateTime>("CreatedAt")
@@ -140,24 +186,39 @@ namespace Reakt.Persistance.Migrations
                     b.HasIndex("BoardId");
 
                     b.ToTable("Posts");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1L,
+                            Active = false,
+                            BoardId = 1L,
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Description = "This is a seeded post",
+                            Title = "Seed post"
+                        });
                 });
 
             modelBuilder.Entity("Reakt.Application.Persistence.Models.Comment", b =>
                 {
-                    b.HasOne("Reakt.Application.Persistence.Models.Comment", "Parent")
-                        .WithMany()
+                    b.HasOne("Reakt.Application.Persistence.Models.Comment", null)
+                        .WithMany("Replies")
                         .HasForeignKey("ParentId");
 
                     b.HasOne("Reakt.Application.Persistence.Models.Post", null)
                         .WithMany("Comments")
-                        .HasForeignKey("PostId");
+                        .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Reakt.Application.Persistence.Models.Post", b =>
                 {
                     b.HasOne("Reakt.Application.Persistence.Models.Board", null)
                         .WithMany("Posts")
-                        .HasForeignKey("BoardId");
+                        .HasForeignKey("BoardId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

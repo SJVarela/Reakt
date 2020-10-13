@@ -15,7 +15,7 @@ namespace Reakt.Server.Models
         /// <summary>
         /// Board posts
         /// </summary>
-        public List<Post> Posts { get; set; }
+        public IEnumerable<Post> Posts { get; set; }
 
         /// <summary>
         /// Board Title
