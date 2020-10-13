@@ -56,7 +56,6 @@ namespace Reakt.Server.Tests.Unit
             var id = 5;
             var expected = _fixture.Build<DM.Comment>()
                                    .With(x => x.Id, id)
-                                   .Without(x => x.Parent)
                                    .Create();
 
             _commentService.Setup(s => s.GetAsync(id))

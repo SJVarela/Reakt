@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Reakt.Application.Persistence;
+using Reakt.Application.Persistence.Attributes;
 using Reakt.Application.Persistence.Models;
 using System;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
@@ -24,11 +24,10 @@ namespace Reakt.Persistance.DataAccess
                         break;
 
                     case EntityState.Modified:
-                        if (entry.Members.Any(p => p.Metadata.PropertyInfo.GetCustomAttribute<RequiredAttribute>() != null && p.IsModified))
+                        if (entry.Members.Any(p => p.Metadata.PropertyInfo.GetCustomAttribute<TrackedAttribute>() != null && p.IsModified))
                         {
-                            entry.Entity.EditedAt = DateTime.Now;
+                            entry.Entity.UpdatedAt = DateTime.Now;
                         }
-                        entry.Entity.UpdatedAt = DateTime.Now;
                         break;
 
                     case EntityState.Deleted:

@@ -108,10 +108,8 @@ namespace Reakt.Application.Services
         {
             var comment = await _dbContext.Comments.FirstOrDefaultAsync(c => c.Id == entity.Id);
             _mapper.Map(entity, comment);
-
-            var storedComment = _dbContext.Comments.Update(comment).Entity;
             await _dbContext.SaveChangesAsync();
-            return _mapper.Map<DM.Comment>(storedComment);
+            return _mapper.Map<DM.Comment>(comment);
         }
     }
 }
