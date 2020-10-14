@@ -6,8 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
-using Reakt.Application.Contracts.Interfaces;
-using Reakt.Application.Services;
+using Reakt.Application;
 using Reakt.Persistance.DependencyInjection;
 using System;
 using System.IO;
@@ -71,16 +70,12 @@ namespace Reakt.Server
             services.AddLogging(conf => conf.AddConsole());
             services.AddPersistence(Configuration);
             services.AddAutoMapper(typeof(Startup));
+            services.AddApplication();
 
             services.AddControllers()
                 .AddNewtonsoftJson();
             //For testing!
             services.AddCors(opt => opt.AddDefaultPolicy(builder => builder.AllowAnyOrigin().AllowAnyHeader()));
-
-            //DI services
-            services.AddScoped<ICommentService, CommentService>();
-            services.AddScoped<IBoardService, BoardService>();
-            services.AddScoped<IPostService, PostService>();
 
             services.AddSwaggerGen(c =>
             {

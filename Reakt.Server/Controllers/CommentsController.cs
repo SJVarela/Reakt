@@ -1,10 +1,15 @@
 ﻿using AutoMapper;
+using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Reakt.Application.Comments.Commands.AddComment;
+using Reakt.Application.Comments.Commands.AddReply;
+using Reakt.Application.Comments.Queries;
 using Reakt.Application.Contracts.Interfaces;
 using Reakt.Server.Models;
+using Reakt.Server.Models.Filters;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -22,6 +27,7 @@ namespace Reakt.Server.Controllers
         private readonly ICommentService _commentService;
         private readonly ILogger _logger;
         private readonly IMapper _mapper;
+        private readonly IMediator _mediator;
 
         /// <summary>
         /// Default constructor
@@ -29,11 +35,13 @@ namespace Reakt.Server.Controllers
         /// <param name="logger"></param>
         /// <param name="commentService"></param>
         /// <param name="mapper"></param>
-        public CommentsController(ICommentService commentService, ILogger<CommentsController> logger, IMapper mapper)
+        /// <param name="mediator"></param>
+        public CommentsController(ICommentService commentService, ILogger<CommentsController> logger, IMapper mapper, IMediator mediator)
         {
             _logger = logger;
             _commentService = commentService;
             _mapper = mapper;
+            _mediator = mediator;
         }
 
         /// <summary>
@@ -50,7 +58,7 @@ namespace Reakt.Server.Controllers
             try
             {
                 var comment = _mapper.Map<DM.Comment>(commentDto);
-                return Ok(_mapper.Map<Comment>(await _commentService.AddCommentAsync(postId, comment)));
+                return Ok(_mapper.Map<Comment>(await _mediator.Send(new AddCommentCommand { PostId = postId, Comment = comment })));
             }
             catch (Exception ex)
             {
@@ -71,12 +79,8 @@ namespace Reakt.Server.Controllers
         {
             try
             {
-                var comment = await _commentService.GetAsync(id);
-                if (comment == null)
-                {
-                    return NotFound();
-                }
-                return Ok(_mapper.Map<Comment>(comment));
+                var comment = await _mediator.Send(new GetCommentDetailQuery { Id = id });
+                return comment != null ? Ok(_mapper.Map<Comment>(comment)) : NotFound() as ActionResult;
             }
             catch (Exception ex)
             {
@@ -89,21 +93,23 @@ namespace Reakt.Server.Controllers
         /// Gets all the comments for a posts
         /// </summary>
         /// <param name="postId">Post identifier</param>
-        /// <param name="startRange">Starting item position</param>
-        /// <param name="endRange">Ending item position</param>
         /// <returns>List of comments</returns>
         [HttpGet("posts/{postId}/comments")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<IEnumerable<Comment>>> GetForPostAsync([FromRoute] long postId, int startRange = 0, int endRange = 50)
+        public async Task<ActionResult<IEnumerable<Comment>>> GetForPostAsync([FromRoute] long postId, [FromQuery] QueryFilter filter)
         {
-            if (startRange >= endRange)
+            if (!ModelState.IsValid)
             {
                 return BadRequest();
             }
             try
             {
-                var result = await _commentService.GetForPostAsync(postId, startRange, endRange);
+                var result = await _mediator.Send(new GetCommentsQuery
+                {
+                    PostId = postId,
+                    Filter = _mapper.Map<Application.Contracts.Common.QueryFilter>(filter)
+                });
                 return Ok(_mapper.Map<IEnumerable<Comment>>(result));
             }
             catch (Exception ex)
@@ -117,17 +123,19 @@ namespace Reakt.Server.Controllers
         /// Gets a comment's replies
         /// </summary>
         /// <param name="id">Comment unique identifier</param>
-        /// <param name="startRange">Starting item position</param>
-        /// <param name="endRange">Ending item position</param>
         /// <returns>List of comment's replies</returns>
         [HttpGet("comments/{id}/replies")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<IEnumerable<Comment>>> GetRepliesAsync(long id, int startRange = 0, int endRange = 50)
+        public async Task<ActionResult<IEnumerable<Comment>>> GetRepliesAsync(long id, QueryFilter filter)
         {
             try
             {
-                var comment = await _commentService.GetRepliesAsync(id, startRange, endRange);
+                var comment = await _mediator.Send(new GetCommentRepliesQuery
+                {
+                    CommentId = id,
+                    Filter = _mapper.Map<Application.Contracts.Common.QueryFilter>(filter)
+                });
                 return comment != null ? Ok(_mapper.Map<IEnumerable<Comment>>(comment)) : NotFound() as ActionResult;
             }
             catch (Exception ex)
@@ -151,12 +159,8 @@ namespace Reakt.Server.Controllers
             try
             {
                 var comment = _mapper.Map<DM.Comment>(commentDto);
-                var createdComment = await _commentService.ReplyAsync(id, comment);
-                if (createdComment is null)
-                {
-                    return NotFound();
-                }
-                return Ok(_mapper.Map<Comment>(createdComment));
+                var createdComment = await _mediator.Send(new AddReplyCommand { CommentId = id, Comment = comment });
+                return createdComment != null ? Ok(_mapper.Map<Comment>(createdComment)) : NotFound() as ActionResult;
             }
             catch (Exception ex)
             {

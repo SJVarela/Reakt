@@ -1,6 +1,7 @@
 ﻿using AutoFixture;
 using AutoMapper;
 using FluentAssertions;
+using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.JsonPatch.Operations;
@@ -8,12 +9,14 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
+using Reakt.Application.Comments.Queries;
 using Reakt.Application.Contracts.Interfaces;
 using Reakt.Server.Controllers;
 using Reakt.Server.MapperConfig;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using DM = Reakt.Domain.Models;
 using SM = Reakt.Server.Models;
@@ -25,6 +28,7 @@ namespace Reakt.Server.Tests.Unit
     {
         private readonly Mock<ICommentService> _commentService = new Mock<ICommentService>();
         private readonly Mock<ILogger<CommentsController>> _logger = new Mock<ILogger<CommentsController>>();
+        private readonly Mock<IMediator> _mediator = new Mock<IMediator>();
         private CommentsController _commentsController;
         private Fixture _fixture;
         private IMapper _mapper;
@@ -33,8 +37,7 @@ namespace Reakt.Server.Tests.Unit
         public async Task Get_by_Id_Error_Should_Return_ServerError_LogError()
         {
             //Arrange
-            _commentService.Setup(s => s.GetAsync(It.IsAny<long>()))
-                           .Throws<Exception>();
+            _mediator.Setup(m => m.Send(It.IsAny<GetCommentDetailQuery>(), It.IsAny<CancellationToken>())).Throws<Exception>();
 
             //Act
             var result = (await _commentsController.GetAsync(1)).Result;
@@ -58,7 +61,7 @@ namespace Reakt.Server.Tests.Unit
                                    .With(x => x.Id, id)
                                    .Create();
 
-            _commentService.Setup(s => s.GetAsync(id))
+            _mediator.Setup(s => s.Send(It.IsAny<GetCommentDetailQuery>(), It.IsAny<CancellationToken>()))
                            .ReturnsAsync(expected);
 
             //Act
@@ -73,8 +76,8 @@ namespace Reakt.Server.Tests.Unit
         public async Task Get_by_Wrong_Id_Should_Return_NotFound()
         {
             //Arrange
-            _commentService.Setup(s => s.GetAsync(It.IsAny<long>()))
-                           .ReturnsAsync((long c) => { return null; });
+            _mediator.Setup(s => s.Send(It.IsAny<GetCommentDetailQuery>(), It.IsAny<CancellationToken>()))
+                           .ReturnsAsync((DM.Comment)null);
 
             //Act
             var result = (await _commentsController.GetAsync(1)).Result;
@@ -90,10 +93,10 @@ namespace Reakt.Server.Tests.Unit
             //Arrange
             var serviceResult = _fixture.CreateMany<DM.Comment>(10);
 
-            _commentService.Setup(s => s.GetForPostAsync(It.IsAny<long>(), It.IsAny<int>(), It.IsAny<int>()))
-                           .ReturnsAsync(serviceResult);
+            _mediator.Setup(m => m.Send(It.IsAny<GetCommentsQuery>(), It.IsAny<CancellationToken>()))
+                     .ReturnsAsync(serviceResult);
             //Act
-            var result = (await _commentsController.GetForPostAsync(1)).Result as OkObjectResult;
+            var result = (await _commentsController.GetForPostAsync(1, new SM.Filters.QueryFilter())).Result as OkObjectResult;
 
             //Assert
             result.Value.Should().BeEquivalentTo(_mapper.Map<IEnumerable<SM.Comment>>(serviceResult));
@@ -102,8 +105,12 @@ namespace Reakt.Server.Tests.Unit
         [OneTimeSetUp]
         public void Setup()
         {
-            _mapper = new Mapper(new MapperConfiguration(conf => conf.AddProfile(new CommentProfile())));
-            _commentsController = new CommentsController(_commentService.Object, _logger.Object, _mapper);
+            _mapper = new Mapper(new MapperConfiguration(conf =>
+            {
+                conf.AddProfile(new CommentProfile());
+                conf.AddProfile(new QueryFilterProfile());
+            }));
+            _commentsController = new CommentsController(_commentService.Object, _logger.Object, _mapper, _mediator.Object);
             _fixture = new Fixture();
             _fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList()
                              .ForEach(b => _fixture.Behaviors.Remove(b));
