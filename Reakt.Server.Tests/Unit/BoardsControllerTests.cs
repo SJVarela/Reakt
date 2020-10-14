@@ -35,7 +35,7 @@ namespace Reakt.Server.Tests.Unit
                                    .Without(x => x.Posts)
                                    .Create();
 
-            _boardService.Setup(s => s.GetAsync(id))
+            _boardService.Setup(s => s.GetAsync(id, null))
                            .ReturnsAsync(expected);
 
             //Act

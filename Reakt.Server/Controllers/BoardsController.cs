@@ -42,7 +42,7 @@ namespace Reakt.Server.Controllers
         {
             try
             {
-                return Ok(_mapper.Map<IEnumerable<Board>>(await _boardService.GetAsync()));
+                return Ok(_mapper.Map<IEnumerable<Board>>(await _boardService.GetAsync(null)));
             }
             catch (Exception ex)
             {
@@ -62,7 +62,7 @@ namespace Reakt.Server.Controllers
         {
             try
             {
-                var board = await _boardService.GetAsync(id);
+                var board = await _boardService.GetAsync(id, null);
                 if (board is null)
                 {
                     return NotFound();

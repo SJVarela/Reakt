@@ -35,25 +35,25 @@ namespace Reakt.Application.Services
             return _mapper.Map<DM.Comment>(storedComment);
         }
 
-        public Task<DM.Comment> CreateAsync(DM.Comment entity)
+        public Task<DM.Comment> CreateAsync(DM.Comment entity, CancellationToken? cancellationToken)
         {
             throw new System.NotImplementedException();
         }
 
-        public async Task DeleteAsync(long id)
+        public async Task DeleteAsync(long id, CancellationToken? cancellationToken)
         {
             _dbContext.Comments.Remove(_dbContext.Comments.First(x => x.Id == id));
-            await _dbContext.SaveChangesAsync();
+            await _dbContext.SaveChangesAsync(cancellationToken ?? new CancellationToken());
         }
 
-        public async Task<IEnumerable<DM.Comment>> GetAsync()
+        public async Task<IEnumerable<DM.Comment>> GetAsync(CancellationToken? cancellationToken)
         {
-            return _mapper.Map<IEnumerable<DM.Comment>>(await _dbContext.Comments.ToListAsync());
+            return _mapper.Map<IEnumerable<DM.Comment>>(await _dbContext.Comments.ToListAsync(cancellationToken ?? new CancellationToken()));
         }
 
-        public async Task<DM.Comment> GetAsync(long id)
+        public async Task<DM.Comment> GetAsync(long id, CancellationToken? cancellationToken)
         {
-            var result = await _dbContext.Comments.FirstOrDefaultAsync(c => c.Id == id);
+            var result = await _dbContext.Comments.FirstOrDefaultAsync(c => c.Id == id, cancellationToken ?? new CancellationToken());
             return _mapper.Map<DM.Comment>(result);
         }
 
@@ -109,11 +109,11 @@ namespace Reakt.Application.Services
             return _mapper.Map<DM.Comment>(storedComment);
         }
 
-        public async Task<DM.Comment> UpdateAsync(DM.Comment entity)
+        public async Task<DM.Comment> UpdateAsync(DM.Comment entity, CancellationToken? cancellationToken)
         {
             var comment = await _dbContext.Comments.FirstOrDefaultAsync(c => c.Id == entity.Id);
             _mapper.Map(entity, comment);
-            await _dbContext.SaveChangesAsync();
+            await _dbContext.SaveChangesAsync(cancellationToken ?? new CancellationToken());
             return _mapper.Map<DM.Comment>(comment);
         }
     }

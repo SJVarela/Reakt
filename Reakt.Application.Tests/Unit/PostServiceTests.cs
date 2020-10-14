@@ -3,6 +3,7 @@ using AutoMapper;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using NUnit.Framework;
+using Reakt.Application.Contracts.Common;
 using Reakt.Application.Services;
 using Reakt.Application.Tests.MockFactories;
 
@@ -35,7 +36,7 @@ namespace Reakt.Application.Tests.Unit
                                .Create();
 
             //Act
-            var result = _postService.AddAsync(boardId, post).Result;
+            var result = _postService.AddAsync(boardId, post, null).Result;
 
             //Assert
             result.Id.Should().BeGreaterThan(0);
@@ -52,7 +53,7 @@ namespace Reakt.Application.Tests.Unit
                                .Create();
 
             //Act
-            var result = _postService.AddAsync(boardId, post).Result;
+            var result = _postService.AddAsync(boardId, post, null).Result;
 
             //Assert
             result.CreatedAt.Should().NotBeSameDateAs(new DateTime());
@@ -67,7 +68,7 @@ namespace Reakt.Application.Tests.Unit
                    .Create();
 
             //Act-Assert
-            _postService.Invoking(x => x.CreateAsync(post)).Should().Throw<NotImplementedException>();
+            _postService.Invoking(x => x.CreateAsync(post, null)).Should().Throw<NotImplementedException>();
         }
 
         [Test]
@@ -77,7 +78,7 @@ namespace Reakt.Application.Tests.Unit
             var id = _context.Posts.First().Id;
 
             //Act
-            _postService.DeleteAsync(id).Wait();
+            _postService.DeleteAsync(id, null).Wait();
             var result = _context.Posts.FirstOrDefault(x => x.Id == id);
 
             //Assert
@@ -91,7 +92,7 @@ namespace Reakt.Application.Tests.Unit
             var id = _context.Posts.First().Id;
 
             //Act
-            _postService.DeleteAsync(id).Wait();
+            _postService.DeleteAsync(id, null).Wait();
             var deletedAt = _context.Posts.IgnoreQueryFilters().First(p => p.Id == id).DeletedAt;
 
             //Assert
@@ -114,7 +115,7 @@ namespace Reakt.Application.Tests.Unit
             //Arrange
             var expected = _mapper.Map<List<DM.Post>>(_context.Posts.ToList());
             //Act
-            var result = _postService.GetAsync().Result;
+            var result = _postService.GetAsync(null).Result;
 
             //Arrange
             result.Should().BeEquivalentTo(expected);
@@ -127,7 +128,7 @@ namespace Reakt.Application.Tests.Unit
             var invalidId = _context.Posts.Max(p => p.Id) + 1;
 
             //Act
-            var result = _postService.GetAsync(invalidId).Result;
+            var result = _postService.GetAsync(invalidId, null).Result;
 
             //Arrange
             result.Should().BeNull();
@@ -139,7 +140,7 @@ namespace Reakt.Application.Tests.Unit
             //Arrange
             var expected = _mapper.Map<DM.Post>(_context.Posts.First());
             //Act
-            var result = _postService.GetAsync(expected.Id).Result;
+            var result = _postService.GetAsync(expected.Id, null).Result;
 
             //Arrange
             result.Should().BeEquivalentTo(expected);
@@ -151,9 +152,10 @@ namespace Reakt.Application.Tests.Unit
             //Arrange
             var boardId = _context.Posts.Max(b => b.BoardId);
             var expected = _mapper.Map<List<DM.Post>>(_context.Posts.Where(x => x.BoardId == boardId));
+            var filter = new QueryFilter { StartRange = 0, EndRange = 50, Ascending = true, OrderBy = "Id" };
 
             //Act
-            var result = _postService.GetForBoardAsync(boardId, 0, 50).Result;
+            var result = _postService.GetForBoardAsync(boardId, filter, null).Result;
 
             //Arrange
             result.Should().BeEquivalentTo(expected);
@@ -177,7 +179,7 @@ namespace Reakt.Application.Tests.Unit
             expected.Title = newTitle;
 
             //Act
-            var result = _postService.UpdateAsync(expected).Result;
+            var result = _postService.UpdateAsync(expected, null).Result;
 
             //Arrange
             result.UpdatedAt.Should().NotBeNull();
@@ -192,7 +194,7 @@ namespace Reakt.Application.Tests.Unit
             expected.Title = newTitle;
 
             //Act
-            var result = _postService.UpdateAsync(expected).Result;
+            var result = _postService.UpdateAsync(expected, null).Result;
             expected.UpdatedAt = result.UpdatedAt;
 
             //Arrange
