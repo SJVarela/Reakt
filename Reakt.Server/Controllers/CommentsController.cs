@@ -99,7 +99,7 @@ namespace Reakt.Server.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<IEnumerable<Comment>>> GetForPostAsync([FromRoute] long postId, [FromQuery] QueryFilter filter)
         {
-            if (filter.StartRange >= filter.EndRange)
+            if (!ModelState.IsValid)
             {
                 return BadRequest();
             }
@@ -108,9 +108,7 @@ namespace Reakt.Server.Controllers
                 var result = await _mediator.Send(new GetCommentsQuery
                 {
                     PostId = postId,
-                    StartRange = filter.StartRange,
-                    EndRange = filter.EndRange,
-                    OrderBy = filter.OrderBy
+                    Filter = _mapper.Map<Application.Contracts.Common.QueryFilter>(filter)
                 });
                 return Ok(_mapper.Map<IEnumerable<Comment>>(result));
             }
@@ -125,17 +123,19 @@ namespace Reakt.Server.Controllers
         /// Gets a comment's replies
         /// </summary>
         /// <param name="id">Comment unique identifier</param>
-        /// <param name="startRange">Starting item position</param>
-        /// <param name="endRange">Ending item position</param>
         /// <returns>List of comment's replies</returns>
         [HttpGet("comments/{id}/replies")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<IEnumerable<Comment>>> GetRepliesAsync(long id, int startRange = 0, int endRange = 50)
+        public async Task<ActionResult<IEnumerable<Comment>>> GetRepliesAsync(long id, QueryFilter filter)
         {
             try
             {
-                var comment = await _mediator.Send(new GetCommentRepliesQuery { CommentId = id, StartRange = startRange, EndRange = endRange });
+                var comment = await _mediator.Send(new GetCommentRepliesQuery
+                {
+                    CommentId = id,
+                    Filter = _mapper.Map<Application.Contracts.Common.QueryFilter>(filter)
+                });
                 return comment != null ? Ok(_mapper.Map<IEnumerable<Comment>>(comment)) : NotFound() as ActionResult;
             }
             catch (Exception ex)

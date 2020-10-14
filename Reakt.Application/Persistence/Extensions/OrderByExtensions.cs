@@ -6,15 +6,13 @@ namespace Reakt.Application.Persistence.Extensions
 {
     public static class OrderByExtensions
     {
-        public static IQueryable<T> OrderByField<T>(this IQueryable<T> q, string SortField, bool Ascending)
+        public static IQueryable<T> OrderByField<T>(this IQueryable<T> q, string propertyName, bool ascending)
         {
             var param = Expression.Parameter(typeof(T), "p");
-            var prop = Expression.Property(param, SortField);
-            var exp = Expression.Lambda(prop, param);
-            string method = Ascending ? "OrderBy" : "OrderByDescending";
+            var exp = Expression.Lambda(Expression.Property(param, propertyName), param);
+            string method = ascending ? "OrderBy" : "OrderByDescending";
             Type[] types = new Type[] { q.ElementType, exp.Body.Type };
-            var mce = Expression.Call(typeof(Queryable), method, types, q.Expression, exp);
-            return q.Provider.CreateQuery<T>(mce);
+            return q.Provider.CreateQuery<T>(Expression.Call(typeof(Queryable), method, types, q.Expression, exp));
         }
     }
 }

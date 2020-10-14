@@ -1,4 +1,5 @@
-﻿using Reakt.Domain.Models;
+﻿using Reakt.Application.Contracts.Common;
+using Reakt.Domain.Models;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -9,9 +10,9 @@ namespace Reakt.Application.Contracts.Interfaces
     {
         Task<Comment> AddCommentAsync(long postId, Comment comment, CancellationToken? cancellationToken);
 
-        Task<IEnumerable<Comment>> GetForPostAsync(long postId, int startRange, int endRange, string orderBy, CancellationToken? cancellationToken);
+        Task<IEnumerable<Comment>> GetForPostAsync(long postId, QueryFilter filter, CancellationToken? cancellationToken);
 
-        Task<IEnumerable<Comment>> GetRepliesAsync(long parentId, int startRange, int endRange, CancellationToken? cancellationToken);
+        Task<IEnumerable<Comment>> GetRepliesAsync(long parentId, QueryFilter filter, CancellationToken? cancellationToken);
 
         void Like(long id);
 

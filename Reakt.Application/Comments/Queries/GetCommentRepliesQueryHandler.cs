@@ -18,7 +18,7 @@ namespace Reakt.Application.Comments.Queries
 
         public Task<IEnumerable<Comment>> Handle(GetCommentRepliesQuery request, CancellationToken cancellationToken)
         {
-            return _commentService.GetRepliesAsync(request.CommentId, request.StartRange, request.EndRange, cancellationToken);
+            return _commentService.GetRepliesAsync(request.CommentId, request.Filter, cancellationToken);
         }
     }
 }

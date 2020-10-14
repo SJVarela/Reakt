@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
+using Reakt.Application.Contracts.Common;
 using Reakt.Application.Contracts.Interfaces;
 using Reakt.Server.Controllers;
 using Reakt.Server.MapperConfig;
@@ -92,10 +93,10 @@ namespace Reakt.Server.Tests.Unit
             //Arrange
             var serviceResult = _fixture.CreateMany<DM.Comment>(10);
 
-            _commentService.Setup(s => s.GetForPostAsync(It.IsAny<long>(), It.IsAny<int>(), It.IsAny<int>(), null))
+            _commentService.Setup(s => s.GetForPostAsync(It.IsAny<long>(), It.IsAny<QueryFilter>(), null))
                            .ReturnsAsync(serviceResult);
             //Act
-            var result = (await _commentsController.GetForPostAsync(1)).Result as OkObjectResult;
+            var result = (await _commentsController.GetForPostAsync(1, new SM.Filters.QueryFilter())).Result as OkObjectResult;
 
             //Assert
             result.Value.Should().BeEquivalentTo(_mapper.Map<IEnumerable<SM.Comment>>(serviceResult));

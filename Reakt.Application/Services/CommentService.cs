@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Reakt.Application.Contracts.Common;
 using Reakt.Application.Contracts.Interfaces;
 using Reakt.Application.Persistence;
 using Reakt.Application.Persistence.Extensions;
@@ -56,31 +57,32 @@ namespace Reakt.Application.Services
             return _mapper.Map<DM.Comment>(result);
         }
 
-        public async Task<IEnumerable<DM.Comment>> GetForPostAsync(long postId, int startRange, int endRange, string orderBy, CancellationToken? cancellationToken)
+        public async Task<IEnumerable<DM.Comment>> GetForPostAsync(long postId, QueryFilter filter, CancellationToken? cancellationToken)
         {
             var result = await _dbContext.Comments.Where(c => c.PostId == postId && c.ParentId == null)
-                                                  .OrderByField(orderBy, false)
-                                                  .Skip(startRange)
-                                                  .Take(endRange - startRange)
+                                                  .OrderByField(filter.OrderBy, filter.Ascending)
+                                                  .Skip(filter.StartRange)
+                                                  .Take(filter.EndRange - filter.StartRange)
                                                   .ToListAsync(cancellationToken ?? new CancellationToken());
             return _mapper.Map<IEnumerable<DM.Comment>>(result);
         }
 
-        public async Task<IEnumerable<DM.Comment>> GetRepliesAsync(long parentId, int startRange, int endRange, CancellationToken? cancellationToken)
+        public async Task<IEnumerable<DM.Comment>> GetRepliesAsync(long parentId, QueryFilter filter, CancellationToken? cancellationToken)
         {
             var comment = await _dbContext.Comments.FirstOrDefaultAsync(c => c.Id == parentId);
             if (comment is null)
             {
                 return null;
             }
-            return _mapper.Map<IEnumerable<DM.Comment>>(await _dbContext.Comments
-                .Include(c => c.Replies)
-                .Where(c => c.Id == comment.Id)
-                .SelectMany(c => c.Replies)
-                .OrderBy(c => c.CreatedAt)
-                .Skip(startRange)
-                .Take(endRange - startRange)
-                .ToListAsync(cancellationToken ?? new CancellationToken()));
+            return _mapper.Map<IEnumerable<DM.Comment>>(
+                await _dbContext.Comments.Include(c => c.Replies)
+                                         .Where(c => c.Id == comment.Id)
+                                         .SelectMany(c => c.Replies)
+                                         .OrderByField(filter.OrderBy, filter.Ascending)
+                                         .Skip(filter.StartRange)
+                                         .Take(filter.EndRange - filter.StartRange)
+                                         .ToListAsync(cancellationToken ?? new CancellationToken())
+                                         );
         }
 
         public void Like(long id)
