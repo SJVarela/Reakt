@@ -75,7 +75,7 @@ namespace Reakt.Server
             services.AddControllers()
                 .AddNewtonsoftJson();
             //For testing!
-            services.AddCors(opt => opt.AddDefaultPolicy(builder => builder.AllowAnyOrigin()));
+            services.AddCors(opt => opt.AddDefaultPolicy(builder => builder.AllowAnyOrigin().AllowAnyHeader()));
 
             services.AddSwaggerGen(c =>
             {
