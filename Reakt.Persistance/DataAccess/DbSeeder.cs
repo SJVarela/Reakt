@@ -12,7 +12,8 @@ namespace Reakt.Persistance.DataAccess
             {
                 Id = 1,
                 Title = "Seed bored",
-                Description = "This is a seeded board"
+                Description = "This is a seeded board",
+                Active = true
             });
 
             builder.Entity<Post>().HasData(new Post
@@ -20,7 +21,8 @@ namespace Reakt.Persistance.DataAccess
                 Id = 1,
                 Title = "Seed post",
                 Description = "This is a seeded post",
-                BoardId = 1
+                BoardId = 1,
+                Active = true
             });
 
             builder.Entity<Comment>().HasData(new Comment
