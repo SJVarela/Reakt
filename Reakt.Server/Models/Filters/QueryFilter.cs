@@ -24,8 +24,8 @@ namespace Reakt.Server.Models.Filters
         /// <summary>
         /// Field to order by
         /// </summary>
-        [DefaultValue("id")]
-        public string OrderBy { get; set; } = "Id";
+        [DefaultValue(null)]
+        public string OrderBy { get; set; } = null;
 
         /// <summary>
         /// Starting item position
