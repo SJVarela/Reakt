@@ -13,7 +13,7 @@ namespace Reakt.Server.Models.Filters
         /// Ordered by ascending or descending
         /// </summary>
         [DefaultValue(false)]
-        public bool Ascending { get; set; } = false;
+        public bool Ascending { get; set; }
 
         /// <summary>
         /// Ending item position
@@ -25,13 +25,13 @@ namespace Reakt.Server.Models.Filters
         /// Field to order by
         /// </summary>
         [DefaultValue(null)]
-        public string OrderBy { get; set; } = null;
+        public string OrderBy { get; set; }
 
         /// <summary>
         /// Starting item position
         /// </summary>
         [DefaultValue(0)]
-        public int StartRange { get; set; } = 0;
+        public int StartRange { get; set; }
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
