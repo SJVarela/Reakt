@@ -45,7 +45,7 @@ namespace Reakt.Application.Tests.Unit
             //Arrange
             var id = _context.Comments.First().Id;
             //Act
-            _commentService.DeleteAsync(id).Wait();
+            _commentService.DeleteAsync(id, null).Wait();
             var expected = _context.Comments
                 .IgnoreQueryFilters()
                 .FirstOrDefault(c => c.Id == id);
@@ -70,7 +70,7 @@ namespace Reakt.Application.Tests.Unit
             //Arrange
             var expected = _mapper.Map<List<DM.Comment>>(_context.Comments.ToList());
             //Act
-            var result = _commentService.GetAsync().Result;
+            var result = _commentService.GetAsync(null).Result;
 
             //Assert
             result.Should().BeEquivalentTo(expected);
@@ -83,7 +83,7 @@ namespace Reakt.Application.Tests.Unit
             var id = _context.Comments.First().Id;
             var expected = _mapper.Map<DM.Comment>(_context.Comments.First(x => x.Id == id));
             //Act
-            var result = _commentService.GetAsync(id).Result;
+            var result = _commentService.GetAsync(id, null).Result;
 
             //Assert
             result.Should().BeEquivalentTo(expected);

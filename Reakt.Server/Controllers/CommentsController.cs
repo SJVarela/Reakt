@@ -93,6 +93,7 @@ namespace Reakt.Server.Controllers
         /// Gets all the comments for a posts
         /// </summary>
         /// <param name="postId">Post identifier</param>
+        /// <param name="filter"></param>
         /// <returns>List of comments</returns>
         [HttpGet("posts/{postId}/comments")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -182,7 +183,7 @@ namespace Reakt.Server.Controllers
         {
             try
             {
-                var comment = _mapper.Map<Comment>(await _commentService.GetAsync(id));
+                var comment = _mapper.Map<Comment>(await _commentService.GetAsync(id, null));
                 if (comment == null)
                 {
                     return NotFound();
@@ -192,7 +193,7 @@ namespace Reakt.Server.Controllers
                 {
                     return BadRequest(ModelState);
                 }
-                var updatedComment = await _commentService.UpdateAsync(_mapper.Map<DM.Comment>(comment));
+                var updatedComment = await _commentService.UpdateAsync(_mapper.Map<DM.Comment>(comment), null);
                 return Ok(_mapper.Map<Comment>(updatedComment));
             }
             catch (Exception ex)

@@ -1,5 +1,7 @@
-﻿using AutoMapper;
+﻿using AutoFixture;
+using AutoMapper;
 using FluentAssertions;
+using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.JsonPatch.Operations;
@@ -7,17 +9,19 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
+using Reakt.Application.Contracts.Common;
 using Reakt.Application.Contracts.Interfaces;
-using DM = Reakt.Domain.Models;
-using SM = Reakt.Server.Models;
+using Reakt.Application.Posts.Commands.AddPost;
+using Reakt.Application.Posts.Queries;
 using Reakt.Server.Controllers;
 using Reakt.Server.MapperConfig;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
-using AutoFixture;
-using System.Security.Cryptography;
+using DM = Reakt.Domain.Models;
+using SM = Reakt.Server.Models;
 
 namespace Reakt.Server.Tests.Unit
 {
@@ -26,6 +30,7 @@ namespace Reakt.Server.Tests.Unit
     {
         private readonly Mock<ILogger<PostsController>> _logger = new Mock<ILogger<PostsController>>();
 
+        private readonly Mock<IMediator> _mediator = new Mock<IMediator>();
         private readonly Mock<IPostService> _postsService = new Mock<IPostService>();
         private Fixture _fixture;
         private IMapper _mapper;
@@ -35,7 +40,7 @@ namespace Reakt.Server.Tests.Unit
         public async Task AddAsync_Error_Should_Return_ServerError_LogError()
         {
             //Arrange
-            _postsService.Setup(x => x.AddAsync(It.IsAny<long>(), It.IsAny<DM.Post>()))
+            _mediator.Setup(x => x.Send(It.IsAny<AddPostCommand>(), It.IsAny<CancellationToken>()))
                         .Throws<Exception>();
 
             //Act
@@ -62,7 +67,7 @@ namespace Reakt.Server.Tests.Unit
                                     .Without(x => x.Comments)
                                     .Create();
 
-            _postsService.Setup(x => x.AddAsync(It.IsAny<long>(), It.IsAny<DM.Post>()))
+            _mediator.Setup(x => x.Send(It.IsAny<AddPostCommand>(), It.IsAny<CancellationToken>()))
                         .ReturnsAsync(expected);
 
             //Act
@@ -77,9 +82,9 @@ namespace Reakt.Server.Tests.Unit
         public async Task DeleteAsync_Error_Should_Return_ServerError_LogError()
         {
             //Arrange
-            _postsService.Setup(x => x.GetAsync(It.IsAny<long>()))
+            _postsService.Setup(x => x.GetAsync(It.IsAny<long>(), It.IsAny<CancellationToken?>()))
                         .Throws<Exception>();
-            _postsService.Setup(x => x.DeleteAsync(It.IsAny<long>()))
+            _postsService.Setup(x => x.DeleteAsync(It.IsAny<long>(), It.IsAny<CancellationToken?>()))
                         .Throws<Exception>();
 
             //Act
@@ -106,22 +111,22 @@ namespace Reakt.Server.Tests.Unit
                                     .Without(x => x.Comments)
                                     .Create();
 
-            _postsService.Setup(x => x.GetAsync(It.IsAny<long>())).ReturnsAsync(expected);
-            _postsService.Setup(x => x.DeleteAsync(It.IsAny<long>())).Verifiable();
+            _postsService.Setup(x => x.GetAsync(It.IsAny<long>(), It.IsAny<CancellationToken?>())).ReturnsAsync(expected);
+            _postsService.Setup(x => x.DeleteAsync(It.IsAny<long>(), It.IsAny<CancellationToken?>())).Verifiable();
 
             //Act
             var result = (await _postsController.DeleteAsync(1)).Result as OkResult;
 
             //Assert
             result.StatusCode.Should().Be(StatusCodes.Status200OK);
-            _postsService.Verify(m => m.DeleteAsync(It.IsAny<long>()), Times.Once);
+            _postsService.Verify(m => m.DeleteAsync(It.IsAny<long>(), It.IsAny<CancellationToken?>()), Times.Once);
         }
 
         [Test]
         public async Task DeleteAsync_Should_Return_NotFound_When_Id_Not_Found()
         {
             //Arrange
-            _postsService.Setup(x => x.GetAsync(It.IsAny<long>())).ReturnsAsync((DM.Post)null);
+            _postsService.Setup(x => x.GetAsync(It.IsAny<long>(), It.IsAny<CancellationToken?>())).ReturnsAsync((DM.Post)null);
 
             //Act
             var result = (await _postsController.DeleteAsync(1)).Result;
@@ -130,50 +135,12 @@ namespace Reakt.Server.Tests.Unit
             result.Should().BeOfType<NotFoundResult>();
         }
 
-        [Test]
-        public async Task Get_Error_Should_Return_ServerError_LogError()
-        {
-            //Arrange
-            _postsService.Setup(x => x.GetAsync())
-                        .Throws<Exception>();
-
-            //Act
-            var result = (await _postsController.GetAsync()).Result;
-
-            //Assert
-            result.Should().BeOfType<StatusCodeResult>();
-            (result as StatusCodeResult).StatusCode.Should().Be(StatusCodes.Status500InternalServerError);
-
-            _logger.Verify(x => x.Log(It.IsAny<LogLevel>(),
-                                      It.IsAny<EventId>(),
-                                      It.IsAny<It.IsAnyType>(),
-                                      It.IsAny<Exception>(),
-                                      (Func<It.IsAnyType, Exception, string>)It.IsAny<object>()));
-        }
-
-        [Test]
-        public async Task Get_Should_Return_Ok_Result()
-        {
-            //Arrange
-            var serviceResult = _fixture.Build<DM.Post>()
-                                        .Without(x => x.Comments)
-                                        .CreateMany(5);
-
-            _postsService.Setup(s => s.GetAsync()).ReturnsAsync(serviceResult);
-
-            //Act
-            var result = (await _postsController.GetAsync()).Result as OkObjectResult;
-
-            //Assert
-            result.StatusCode.Should().Be(StatusCodes.Status200OK);
-            result.Value.Should().BeEquivalentTo(_mapper.Map<IEnumerable<SM.Post>>(serviceResult));
-        }
 
         [Test]
         public async Task GetById_Error_Should_Return_ServerError_LogError()
         {
             //Arrange
-            _postsService.Setup(x => x.GetAsync(It.IsAny<long>()))
+            _mediator.Setup(x => x.Send(It.IsAny<GetPostDetailQuery>(), It.IsAny<CancellationToken>()))
                         .Throws<Exception>();
 
             //Act
@@ -200,7 +167,7 @@ namespace Reakt.Server.Tests.Unit
                                    .Without(x => x.Comments)
                                    .Create();
 
-            _postsService.Setup(s => s.GetAsync(It.IsAny<long>()))
+            _mediator.Setup(s => s.Send(It.IsAny<GetPostDetailQuery>(), It.IsAny<CancellationToken>()))
                            .ReturnsAsync(expected);
 
             //Act
@@ -215,8 +182,8 @@ namespace Reakt.Server.Tests.Unit
         public async Task GetById_Wrong_Id_Should_Return_NotFound()
         {
             //Arrange
-            _postsService.Setup(s => s.GetAsync(It.IsAny<long>()))
-                           .ReturnsAsync((long c) => { return null; });
+            _mediator.Setup(s => s.Send(It.IsAny<GetPostDetailQuery>(), It.IsAny<CancellationToken>()))
+                           .ReturnsAsync((DM.Post)null);
 
             //Act
             var result = (await _postsController.GetByIdAsync(123)).Result;
@@ -233,11 +200,12 @@ namespace Reakt.Server.Tests.Unit
             var expected = _fixture.Build<DM.Post>()
                                    .Without(x => x.Comments)
                                    .CreateMany();
+            var filter = new QueryFilter { StartRange = 0, EndRange = 50, Ascending = true, OrderBy = "Id" };
 
-            _postsService.Setup(s => s.GetForBoardAsync(It.IsAny<long>(), It.IsAny<int>(), It.IsAny<int>()))
+            _mediator.Setup(s => s.Send(It.IsAny<GetPostsQuery>(), It.IsAny<CancellationToken>()))
                            .ReturnsAsync(expected);
             //Act
-            var result = (await _postsController.GetForBoardAsync(1)).Result as OkObjectResult;
+            var result = (await _postsController.GetForBoardAsync(1, filter)).Result as OkObjectResult;
 
             //Assert
             result.StatusCode.Should().Be(StatusCodes.Status200OK);
@@ -248,7 +216,7 @@ namespace Reakt.Server.Tests.Unit
         public void Setup()
         {
             _mapper = new Mapper(new MapperConfiguration(conf => conf.AddProfile(new PostProfile())));
-            _postsController = new PostsController(_postsService.Object, _logger.Object, _mapper);
+            _postsController = new PostsController(_postsService.Object, _logger.Object, _mapper, _mediator.Object);
             _fixture = new Fixture();
             _fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList()
                              .ForEach(b => _fixture.Behaviors.Remove(b));
@@ -259,15 +227,13 @@ namespace Reakt.Server.Tests.Unit
         public async Task UpdateAsync_Should_Return_UpdatedValues()
         {
             //Arrange
-            var patchDocument = new JsonPatchDocument();
-            patchDocument.Operations.Add(new Operation("add", "/description", "", "New post description"));
-            var post = _fixture.Build<DM.Post>()
-                                   .Without(x => x.Comments)
-                                   .Create();
+            var patchDocument = new JsonPatchDocument<SM.Post>();
+            patchDocument.Operations.Add(new Operation<SM.Post>("add", "/description", "", "New post description"));
+            var post = _fixture.Build<SM.Post>().Create();
             patchDocument.ApplyTo(post);
 
-            _postsService.Setup(x => x.UpdateAsync(It.IsAny<DM.Post>())).ReturnsAsync(post);
-            _postsService.Setup(x => x.GetAsync(It.IsAny<long>())).ReturnsAsync(post);
+            _postsService.Setup(x => x.UpdateAsync(It.IsAny<DM.Post>(), It.IsAny<CancellationToken?>())).ReturnsAsync(_mapper.Map<DM.Post>(post));
+            _postsService.Setup(x => x.GetAsync(It.IsAny<long>(), It.IsAny<CancellationToken?>())).ReturnsAsync(_mapper.Map<DM.Post>(post));
 
             //Act
             var result = (await _postsController.UpdateAsync(1, patchDocument)).Result as OkObjectResult;

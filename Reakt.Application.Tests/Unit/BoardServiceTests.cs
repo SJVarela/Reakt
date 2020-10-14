@@ -41,7 +41,7 @@ namespace Reakt.Application.Tests.Unit
             //Arrange
             var expected = _mapper.Map<DM.Board>(_context.Boards.First(b => b.Id == id));
             //Act
-            var result = await _boardService.GetAsync(id);
+            var result = await _boardService.GetAsync(id, null);
 
             //Arrange
             result.Should().BeEquivalentTo(expected);
@@ -53,7 +53,7 @@ namespace Reakt.Application.Tests.Unit
             //Arrange
             var expected = _mapper.Map<List<DM.Board>>(_context.Boards.ToList());
             //Act
-            var result = await _boardService.GetAsync();
+            var result = await _boardService.GetAsync(null);
 
             //Arrange
             result.Should().BeEquivalentTo(expected);
