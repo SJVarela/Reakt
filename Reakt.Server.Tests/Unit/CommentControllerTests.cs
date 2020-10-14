@@ -76,8 +76,8 @@ namespace Reakt.Server.Tests.Unit
         public async Task Get_by_Wrong_Id_Should_Return_NotFound()
         {
             //Arrange
-            _commentService.Setup(s => s.GetAsync(It.IsAny<long>()))
-                           .ReturnsAsync((long c) => { return null; });
+            _mediator.Setup(s => s.Send(It.IsAny<GetCommentDetailQuery>(), It.IsAny<CancellationToken>()))
+                           .ReturnsAsync((DM.Comment)null);
 
             //Act
             var result = (await _commentsController.GetAsync(1)).Result;
