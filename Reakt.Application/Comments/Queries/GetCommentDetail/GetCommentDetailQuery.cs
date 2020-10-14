@@ -1,7 +1,7 @@
 ﻿using MediatR;
 using Reakt.Domain.Models;
 
-namespace Reakt.Application.Comments.Queries
+namespace Reakt.Application.Comments.Queries.GetCommentDetail
 {
     public class GetCommentDetailQuery : IRequest<Comment>
     {

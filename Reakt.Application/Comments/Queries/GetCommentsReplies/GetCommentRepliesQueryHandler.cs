@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Reakt.Application.Comments.Queries
+namespace Reakt.Application.Comments.Queries.GetCommentsReplies
 {
     public class GetCommentRepliesQueryHandler : IRequestHandler<GetCommentRepliesQuery, IEnumerable<Comment>>
     {

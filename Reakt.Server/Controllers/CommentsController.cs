@@ -6,8 +6,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Reakt.Application.Comments.Commands.AddComment;
 using Reakt.Application.Comments.Commands.AddReply;
-using Reakt.Application.Comments.Queries;
-using Reakt.Application.Contracts.Interfaces;
+using Reakt.Application.Comments.Commands.Update;
+using Reakt.Application.Comments.Queries.GetCommentDetail;
+using Reakt.Application.Comments.Queries.GetComments;
+using Reakt.Application.Comments.Queries.GetCommentsReplies;
 using Reakt.Server.Models;
 using Reakt.Server.Models.Filters;
 using System;
@@ -24,7 +26,6 @@ namespace Reakt.Server.Controllers
     [ApiController]
     public class CommentsController : ControllerBase
     {
-        private readonly ICommentService _commentService;
         private readonly ILogger _logger;
         private readonly IMapper _mapper;
         private readonly IMediator _mediator;
@@ -33,13 +34,11 @@ namespace Reakt.Server.Controllers
         /// Default constructor
         /// </summary>
         /// <param name="logger"></param>
-        /// <param name="commentService"></param>
         /// <param name="mapper"></param>
         /// <param name="mediator"></param>
-        public CommentsController(ICommentService commentService, ILogger<CommentsController> logger, IMapper mapper, IMediator mediator)
+        public CommentsController(IMediator mediator, ILogger<CommentsController> logger, IMapper mapper)
         {
             _logger = logger;
-            _commentService = commentService;
             _mapper = mapper;
             _mediator = mediator;
         }
@@ -183,7 +182,7 @@ namespace Reakt.Server.Controllers
         {
             try
             {
-                var comment = _mapper.Map<Comment>(await _commentService.GetAsync(id, null));
+                var comment = _mapper.Map<Comment>(await _mediator.Send(new GetCommentDetailQuery() { Id = id }));
                 if (comment == null)
                 {
                     return NotFound();
@@ -193,7 +192,10 @@ namespace Reakt.Server.Controllers
                 {
                     return BadRequest(ModelState);
                 }
-                var updatedComment = await _commentService.UpdateAsync(_mapper.Map<DM.Comment>(comment), null);
+                var updatedComment = await _mediator.Send(new UpdateCommentCommand
+                {
+                    Comment = _mapper.Map<DM.Comment>(comment)
+                });
                 return Ok(_mapper.Map<Comment>(updatedComment));
             }
             catch (Exception ex)
