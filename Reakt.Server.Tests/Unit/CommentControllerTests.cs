@@ -9,13 +9,14 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
-using Reakt.Application.Contracts.Common;
+using Reakt.Application.Comments.Queries;
 using Reakt.Application.Contracts.Interfaces;
 using Reakt.Server.Controllers;
 using Reakt.Server.MapperConfig;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using DM = Reakt.Domain.Models;
 using SM = Reakt.Server.Models;
@@ -36,8 +37,7 @@ namespace Reakt.Server.Tests.Unit
         public async Task Get_by_Id_Error_Should_Return_ServerError_LogError()
         {
             //Arrange
-            _commentService.Setup(s => s.GetAsync(It.IsAny<long>()))
-                           .Throws<Exception>();
+            _mediator.Setup(m => m.Send(It.IsAny<GetCommentDetailQuery>(), It.IsAny<CancellationToken>())).Throws<Exception>();
 
             //Act
             var result = (await _commentsController.GetAsync(1)).Result;
@@ -61,7 +61,7 @@ namespace Reakt.Server.Tests.Unit
                                    .With(x => x.Id, id)
                                    .Create();
 
-            _commentService.Setup(s => s.GetAsync(id))
+            _mediator.Setup(s => s.Send(It.IsAny<GetCommentDetailQuery>(), It.IsAny<CancellationToken>()))
                            .ReturnsAsync(expected);
 
             //Act
@@ -93,8 +93,8 @@ namespace Reakt.Server.Tests.Unit
             //Arrange
             var serviceResult = _fixture.CreateMany<DM.Comment>(10);
 
-            _commentService.Setup(s => s.GetForPostAsync(It.IsAny<long>(), It.IsAny<QueryFilter>(), null))
-                           .ReturnsAsync(serviceResult);
+            _mediator.Setup(m => m.Send(It.IsAny<GetCommentsQuery>(), It.IsAny<CancellationToken>()))
+                     .ReturnsAsync(serviceResult);
             //Act
             var result = (await _commentsController.GetForPostAsync(1, new SM.Filters.QueryFilter())).Result as OkObjectResult;
 
@@ -105,7 +105,11 @@ namespace Reakt.Server.Tests.Unit
         [OneTimeSetUp]
         public void Setup()
         {
-            _mapper = new Mapper(new MapperConfiguration(conf => conf.AddProfile(new CommentProfile())));
+            _mapper = new Mapper(new MapperConfiguration(conf =>
+            {
+                conf.AddProfile(new CommentProfile());
+                conf.AddProfile(new QueryFilterProfile());
+            }));
             _commentsController = new CommentsController(_commentService.Object, _logger.Object, _mapper, _mediator.Object);
             _fixture = new Fixture();
             _fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList()
