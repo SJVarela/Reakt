@@ -2,6 +2,7 @@
 using AutoMapper;
 using FluentAssertions;
 using NUnit.Framework;
+using Reakt.Application.Contracts.Common;
 using Reakt.Application.Services;
 using Reakt.Application.Tests.MockFactories;
 using Reakt.Persistance.DataAccess;
@@ -53,7 +54,7 @@ namespace Reakt.Application.Tests.Unit
             //Arrange
             var expected = _mapper.Map<List<DM.Board>>(_context.Boards.ToList());
             //Act
-            var result = await _boardService.GetAsync(null);
+            var result = await _boardService.GetAsync(new QueryFilter(), null);
 
             //Arrange
             result.Should().BeEquivalentTo(expected);
