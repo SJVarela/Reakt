@@ -1,11 +1,14 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Reakt.Application.Contracts.Common;
 using Reakt.Application.Contracts.Interfaces;
 using Reakt.Application.Persistence;
+using Reakt.Application.Persistence.Extensions;
 using Reakt.Domain.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Reakt.Application.Services
@@ -30,13 +33,14 @@ namespace Reakt.Application.Services
         /// </summary>
         /// <param name="boardId">The Board where the Post belongs</param>
         /// <param name="entity">Post properties</param>
+        /// <param name="cancellationToken">Async token for cancelling requests</param>
         /// <returns>The created Post</returns>
-        public async Task<Post> AddAsync(long boardId, Post entity)
+        public async Task<Post> AddAsync(long boardId, Post entity, CancellationToken? cancellationToken)
         {
             var post = _mapper.Map<Persistence.Models.Post>(entity);
             post.BoardId = boardId;
             var result = _dbContext.Posts.Add(post).Entity;
-            await _dbContext.SaveChangesAsync();
+            await _dbContext.SaveChangesAsync(cancellationToken ?? new CancellationToken());
 
             return _mapper.Map<Post>(result);
         }
@@ -46,7 +50,7 @@ namespace Reakt.Application.Services
         /// </summary>
         /// <param name="entity">Post properties</param>
         /// <returns>Not implemented exception</returns>
-        public Task<Post> CreateAsync(Post entity)
+        public Task<Post> CreateAsync(Post entity, CancellationToken? cancellationToken)
         {
             //No way to create a post without a board
             throw new NotImplementedException();
@@ -56,20 +60,20 @@ namespace Reakt.Application.Services
         /// Delete a Post
         /// </summary>
         /// <param name="id">An existing Post identifier</param>
-        public async Task DeleteAsync(long id)
+        public async Task DeleteAsync(long id, CancellationToken? cancellationToken)
         {
             var post = _dbContext.Posts.Find(id);
             _dbContext.Posts.Remove(post);
-            await _dbContext.SaveChangesAsync();
+            await _dbContext.SaveChangesAsync(cancellationToken ?? new CancellationToken());
         }
 
         /// <summary>
         /// Get All Posts
         /// </summary>
         /// <returns></returns>
-        public async Task<IEnumerable<Post>> GetAsync()
+        public async Task<IEnumerable<Post>> GetAsync(CancellationToken? cancellationToken)
         {
-            return _mapper.Map<IEnumerable<Post>>(await _dbContext.Posts.ToListAsync());
+            return _mapper.Map<IEnumerable<Post>>(await _dbContext.Posts.ToListAsync( cancellationToken ?? new CancellationToken()));
         }
 
         /// <summary>
@@ -77,25 +81,25 @@ namespace Reakt.Application.Services
         /// </summary>
         /// <param name="id"></param>
         /// <returns>Post with given id</returns>
-        public async Task<Post> GetAsync(long id)
+        public async Task<Post> GetAsync(long id, CancellationToken? cancellationToken)
         {
-            return _mapper.Map<Post>(await _dbContext.Posts.FirstOrDefaultAsync(x => x.Id == id));
+            return _mapper.Map<Post>(await _dbContext.Posts.FirstOrDefaultAsync(x => x.Id == id, cancellationToken ?? new CancellationToken()));
         }
 
         /// <summary>
         /// Get all Posts for a given Board
         /// </summary>
         /// <param name="boardId">Board identifier</param>
-        /// <param name="startRange">Page init</param>
-        /// <param name="endRange">Page end</param>
+        /// <param name="filter">Filters for the query</param>
+        /// <param name="cancellationToken">Async token for cancelling requests</param>
         /// <returns>List of Posts in given Board</returns>
-        public async Task<IEnumerable<Post>> GetForBoardAsync(long boardId, int startRange, int endRange)
+        public async Task<IEnumerable<Post>> GetForBoardAsync(long boardId, QueryFilter filter, CancellationToken? cancellationToken)
         {
             var result = await _dbContext.Posts.Where(x => x.BoardId == boardId)
-                                               .OrderByDescending(c => c.CreatedAt)
-                                               .Skip(startRange)
-                                               .Take(endRange - startRange)
-                                               .ToListAsync();
+                                               .OrderByField(filter.OrderBy, filter.Ascending)
+                                               .Skip(filter.StartRange)
+                                               .Take(filter.EndRange - filter.StartRange)
+                                               .ToListAsync(cancellationToken ?? new CancellationToken());
 
             return _mapper.Map<IEnumerable<Post>>(result);
         }
@@ -105,13 +109,13 @@ namespace Reakt.Application.Services
         /// </summary>
         /// <param name="entity"></param>
         /// <returns>The updated Post</returns>
-        public async Task<Post> UpdateAsync(Post entity)
+        public async Task<Post> UpdateAsync(Post entity, CancellationToken? cancellationToken)
         {
             var oldPost = await _dbContext.Posts.FindAsync(entity.Id);
             _mapper.Map(entity, oldPost);
 
             var newPost = _dbContext.Posts.Update(oldPost).Entity;
-            await _dbContext.SaveChangesAsync();
+            await _dbContext.SaveChangesAsync(cancellationToken ?? new CancellationToken());
 
             return _mapper.Map<Post>(newPost);
         }

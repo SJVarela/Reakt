@@ -17,7 +17,7 @@ namespace Reakt.Application.Comments.Queries.GetCommentDetail
 
         public Task<Comment> Handle(GetCommentDetailQuery request, CancellationToken cancellationToken)
         {
-            return _commentService.GetAsync(request.Id);
+            return _commentService.GetAsync(request.Id, cancellationToken);
         }
     }
 }

@@ -88,6 +88,7 @@ namespace Reakt.Server.Controllers
         /// Gets all the comments for a posts
         /// </summary>
         /// <param name="postId">Post identifier</param>
+        /// <param name="filter"></param>
         /// <returns>List of comments</returns>
         [HttpGet("posts/{postId}/comments")]
         [ProducesResponseType(StatusCodes.Status200OK)]
