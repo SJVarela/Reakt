@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Reakt.Application.Contracts.Interfaces;
 using Reakt.Application.Posts.Commands.AddPost;
+using Reakt.Application.Posts.Commands.DeletePost;
+using Reakt.Application.Posts.Commands.UpdatePost;
 using Reakt.Application.Posts.Queries;
 using Reakt.Server.Models;
 using Reakt.Server.Models.Filters;
@@ -17,29 +19,21 @@ using DM = Reakt.Domain.Models;
 namespace Reakt.Server.Controllers
 {
     /// <summary>
-    /// The Posts controller
+    /// The Posts controller to handle requests for Posts api
     /// </summary>
     [Route("api")]
     [ApiController]
-    public class PostsController : ControllerBase
+    public class PostsController : BaseController
     {
-        private readonly ILogger _logger;
-        private readonly IMapper _mapper;
-        private readonly IMediator _mediator;
-        private readonly IPostService _postService;
 
         /// <summary>
         /// Default constructor
         /// </summary>
-        /// <param name="postService">Injected Post service</param>
         /// <param name="logger">Injected logger</param>
         /// <param name="mapper">Injected mapper</param>
-        public PostsController(IPostService postService, ILogger<PostsController> logger, IMapper mapper, IMediator mediator)
+        /// <param name="mediator">Injected Mediator</param>
+        public PostsController(ILogger<PostsController> logger, IMapper mapper, IMediator mediator) : base( mediator, mapper, logger)
         {
-            _postService = postService;
-            _logger = logger;
-            _mapper = mapper;
-            _mediator = mediator;
         }
 
         /// <summary>
@@ -54,12 +48,12 @@ namespace Reakt.Server.Controllers
         {
             try
             {
-                var post = _mapper.Map<Domain.Models.Post>(postDto);
-                return Ok(_mapper.Map<Post>(await _mediator.Send(new AddPostCommand { BoardId = boardId, Post = post })));
+                var post = Mapper.Map<Domain.Models.Post>(postDto);
+                return Ok(Mapper.Map<Post>(await Mediator.Send(new AddPostCommand { BoardId = boardId, Post = post })));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, ex.Message);
+                Logger.LogError(ex, ex.Message);
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
@@ -76,17 +70,17 @@ namespace Reakt.Server.Controllers
         {
             try
             {
-                var post = await _postService.GetAsync(id, null);
+                var post = await Mediator.Send(new GetPostDetailQuery { Id = id });
                 if (post == null)
                 {
                     return NotFound();
                 }
-                await _postService.DeleteAsync(id, null);
+                await Mediator.Send(new DeletePostCommand { Id = id });
                 return Ok();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, ex.Message);
+                Logger.LogError(ex, ex.Message);
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
@@ -103,16 +97,16 @@ namespace Reakt.Server.Controllers
         {
             try
             {
-                var post = await _mediator.Send(new GetPostDetailQuery { Id = id });
+                var post = await Mediator.Send(new GetPostDetailQuery { Id = id });
                 if (post == null)
                 {
                     return NotFound();
                 }
-                return Ok(_mapper.Map<Post>(post));
+                return Ok(Mapper.Map<Post>(post));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, ex.Message);
+                Logger.LogError(ex, ex.Message);
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
@@ -135,16 +129,16 @@ namespace Reakt.Server.Controllers
             }
             try
             {
-                var result = await _mediator.Send(new GetPostsQuery
+                var result = await Mediator.Send(new GetPostsQuery
                 {
                     BoardId = boardId,
-                    Filter = _mapper.Map<Application.Contracts.Common.QueryFilter>(filter)
+                    Filter = Mapper.Map<Application.Contracts.Common.QueryFilter>(filter)
                 });
-                return Ok(_mapper.Map<IEnumerable<Post>>(result));
+                return Ok(Mapper.Map<IEnumerable<Post>>(result));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, ex.Message);
+                Logger.LogError(ex, ex.Message);
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
@@ -162,7 +156,7 @@ namespace Reakt.Server.Controllers
         {
             try
             {
-                var post = _mapper.Map<Post>(await _postService.GetAsync(id, null));
+                var post = Mapper.Map<Post>(await Mediator.Send(new GetPostDetailQuery { Id = id }));
                 if (post == null)
                 {
                     return NotFound();
@@ -172,12 +166,12 @@ namespace Reakt.Server.Controllers
                 {
                     return BadRequest(ModelState);
                 }
-                var updatedPost = await _postService.UpdateAsync(_mapper.Map<DM.Post>(post), null);
-                return Ok(_mapper.Map<Post>(updatedPost));
+                var updatedPost = await Mediator.Send(new UpdatePostCommand { Post = Mapper.Map<DM.Post>(post) });
+                return Ok(Mapper.Map<Post>(updatedPost));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, ex.Message);
+                Logger.LogError(ex, ex.Message);
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
