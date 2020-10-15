@@ -101,7 +101,6 @@ namespace Reakt.Server.Controllers
             }
             try
             {
-                throw new Exception();
                 var result = await Mediator.Send(new GetCommentsQuery
                 {
                     PostId = postId,
