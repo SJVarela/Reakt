@@ -128,7 +128,7 @@ namespace Reakt.Server.Tests.Unit
         public async Task DeleteAsync_Should_Return_NotFound_When_Id_Not_Found()
         {
             //Arrange
-            _mediator.Setup(x => x.Send(It.IsAny<DeletePostCommand>(), It.IsAny<CancellationToken>())).ReturnsAsync((DM.Post)null);
+            _mediator.Setup(x => x.Send(It.IsAny<GetPostDetailQuery>(), It.IsAny<CancellationToken>())).ReturnsAsync((DM.Post)null);
 
             //Act
             var result = (await _postsController.DeleteAsync(1)).Result;

@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Reakt.Application.Contracts.Interfaces;
 using Reakt.Application.Posts.Commands.AddPost;
 using Reakt.Application.Posts.Commands.DeletePost;
 using Reakt.Application.Posts.Commands.UpdatePost;
@@ -25,14 +24,13 @@ namespace Reakt.Server.Controllers
     [ApiController]
     public class PostsController : BaseController
     {
-
         /// <summary>
         /// Default constructor
         /// </summary>
         /// <param name="logger">Injected logger</param>
         /// <param name="mapper">Injected mapper</param>
         /// <param name="mediator">Injected Mediator</param>
-        public PostsController(ILogger<PostsController> logger, IMapper mapper, IMediator mediator) : base( mediator, mapper, logger)
+        public PostsController(ILogger<PostsController> logger, IMapper mapper, IMediator mediator) : base(mediator, mapper, logger)
         {
         }
 
