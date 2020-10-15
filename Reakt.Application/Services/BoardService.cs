@@ -41,7 +41,7 @@ namespace Reakt.Application.Services
                                                 .Take(filter.EndRange - filter.StartRange)
                                                 .ToListAsync(cancellationToken ?? new CancellationToken());
 
-            return _mapper.Map<IEnumerable<Board>>(await _dbContext.Boards.ToListAsync(cancellationToken ?? new CancellationToken()));
+            return _mapper.Map<IEnumerable<Board>>(result);
         }
 
         public async Task<Board> GetAsync(long id, CancellationToken? cancellationToken)
