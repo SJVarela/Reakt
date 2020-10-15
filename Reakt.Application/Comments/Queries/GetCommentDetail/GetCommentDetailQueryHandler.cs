@@ -4,7 +4,7 @@ using Reakt.Domain.Models;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Reakt.Application.Comments.Queries
+namespace Reakt.Application.Comments.Queries.GetCommentDetail
 {
     public class GetCommentDetailQueryHandler : IRequestHandler<GetCommentDetailQuery, Comment>
     {

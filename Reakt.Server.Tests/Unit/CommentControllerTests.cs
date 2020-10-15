@@ -9,8 +9,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
-using Reakt.Application.Comments.Queries;
-using Reakt.Application.Contracts.Interfaces;
+using Reakt.Application.Comments.Commands.Update;
+using Reakt.Application.Comments.Queries.GetCommentDetail;
+using Reakt.Application.Comments.Queries.GetComments;
 using Reakt.Server.Controllers;
 using Reakt.Server.MapperConfig;
 using System;
@@ -26,7 +27,6 @@ namespace Reakt.Server.Tests.Unit
     [TestFixture]
     public class CommentControllerTests
     {
-        private readonly Mock<ICommentService> _commentService = new Mock<ICommentService>();
         private readonly Mock<ILogger<CommentsController>> _logger = new Mock<ILogger<CommentsController>>();
         private readonly Mock<IMediator> _mediator = new Mock<IMediator>();
         private CommentsController _commentsController;
@@ -110,7 +110,7 @@ namespace Reakt.Server.Tests.Unit
                 conf.AddProfile(new CommentProfile());
                 conf.AddProfile(new QueryFilterProfile());
             }));
-            _commentsController = new CommentsController(_commentService.Object, _logger.Object, _mapper, _mediator.Object);
+            _commentsController = new CommentsController(_mediator.Object, _mapper, _logger.Object);
             _fixture = new Fixture();
             _fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList()
                              .ForEach(b => _fixture.Behaviors.Remove(b));
@@ -124,10 +124,11 @@ namespace Reakt.Server.Tests.Unit
             var patchDocument = new JsonPatchDocument<SM.Comment>();
             patchDocument.Operations.Add(new Operation<SM.Comment>("add", "/message", "", "New message"));
             var comment = _fixture.Create<SM.Comment>();
+            var originalComment = _mapper.Map<SM.Comment>(comment);
             patchDocument.ApplyTo(comment);
 
-            _commentService.Setup(x => x.UpdateAsync(It.IsAny<DM.Comment>(), It.IsAny<CancellationToken?>())).ReturnsAsync(_mapper.Map<DM.Comment>(comment));
-            _commentService.Setup(x => x.GetAsync(It.IsAny<long>(), It.IsAny<CancellationToken?>())).ReturnsAsync(_mapper.Map<DM.Comment>(comment));
+            _mediator.Setup(x => x.Send(It.IsAny<GetCommentDetailQuery>(), It.IsAny<CancellationToken>())).ReturnsAsync(_mapper.Map<DM.Comment>(originalComment));
+            _mediator.Setup(x => x.Send(It.IsAny<UpdateCommentCommand>(), It.IsAny<CancellationToken>())).ReturnsAsync(_mapper.Map<DM.Comment>(comment));
             //Act
             var result = (await _commentsController.UpdateAsync(1, patchDocument)).Result as OkObjectResult;
             //Assert

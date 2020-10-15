@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
@@ -6,8 +7,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Reakt.Application.Comments.Commands.AddComment;
 using Reakt.Application.Comments.Commands.AddReply;
-using Reakt.Application.Comments.Queries;
-using Reakt.Application.Contracts.Interfaces;
+using Reakt.Application.Comments.Commands.Update;
+using Reakt.Application.Comments.Queries.GetCommentDetail;
+using Reakt.Application.Comments.Queries.GetComments;
+using Reakt.Application.Comments.Queries.GetCommentsReplies;
 using Reakt.Server.Models;
 using Reakt.Server.Models.Filters;
 using System;
@@ -20,28 +23,16 @@ namespace Reakt.Server.Controllers
     /// <summary>
     /// Controller to handle requests for comments api
     /// </summary>
-    [Route("api")]
     [ApiController]
-    public class CommentsController : ControllerBase
+    public class CommentsController : BaseController
     {
-        private readonly ICommentService _commentService;
-        private readonly ILogger _logger;
-        private readonly IMapper _mapper;
-        private readonly IMediator _mediator;
-
         /// <summary>
-        /// Default constructor
         /// </summary>
-        /// <param name="logger"></param>
-        /// <param name="commentService"></param>
-        /// <param name="mapper"></param>
         /// <param name="mediator"></param>
-        public CommentsController(ICommentService commentService, ILogger<CommentsController> logger, IMapper mapper, IMediator mediator)
+        /// <param name="mapper"></param>
+        /// <param name="logger"></param>
+        public CommentsController(IMediator mediator, IMapper mapper, ILogger<CommentsController> logger) : base(mediator, mapper, logger)
         {
-            _logger = logger;
-            _commentService = commentService;
-            _mapper = mapper;
-            _mediator = mediator;
         }
 
         /// <summary>
@@ -57,12 +48,16 @@ namespace Reakt.Server.Controllers
         {
             try
             {
-                var comment = _mapper.Map<DM.Comment>(commentDto);
-                return Ok(_mapper.Map<Comment>(await _mediator.Send(new AddCommentCommand { PostId = postId, Comment = comment })));
+                var comment = Mapper.Map<DM.Comment>(commentDto);
+                return Ok(Mapper.Map<Comment>(await Mediator.Send(new AddCommentCommand { PostId = postId, Comment = comment })));
+            }
+            catch (ValidationException ex)
+            {
+                return BadRequest(ex.Errors);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, ex.Message);
+                Logger.LogError(ex, ex.Message);
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
@@ -79,12 +74,12 @@ namespace Reakt.Server.Controllers
         {
             try
             {
-                var comment = await _mediator.Send(new GetCommentDetailQuery { Id = id });
-                return comment != null ? Ok(_mapper.Map<Comment>(comment)) : NotFound() as ActionResult;
+                var comment = await Mediator.Send(new GetCommentDetailQuery { Id = id });
+                return comment != null ? Ok(Mapper.Map<Comment>(comment)) : NotFound() as ActionResult;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, ex.Message);
+                Logger.LogError(ex, ex.Message);
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
@@ -106,16 +101,16 @@ namespace Reakt.Server.Controllers
             }
             try
             {
-                var result = await _mediator.Send(new GetCommentsQuery
+                var result = await Mediator.Send(new GetCommentsQuery
                 {
                     PostId = postId,
-                    Filter = _mapper.Map<Application.Contracts.Common.QueryFilter>(filter)
+                    Filter = Mapper.Map<Application.Contracts.Common.QueryFilter>(filter)
                 });
-                return Ok(_mapper.Map<IEnumerable<Comment>>(result));
+                return Ok(Mapper.Map<IEnumerable<Comment>>(result));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, ex.Message);
+                Logger.LogError(ex, ex.Message);
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
@@ -132,16 +127,16 @@ namespace Reakt.Server.Controllers
         {
             try
             {
-                var comment = await _mediator.Send(new GetCommentRepliesQuery
+                var comment = await Mediator.Send(new GetCommentRepliesQuery
                 {
                     CommentId = id,
-                    Filter = _mapper.Map<Application.Contracts.Common.QueryFilter>(filter)
+                    Filter = Mapper.Map<Application.Contracts.Common.QueryFilter>(filter)
                 });
-                return comment != null ? Ok(_mapper.Map<IEnumerable<Comment>>(comment)) : NotFound() as ActionResult;
+                return comment != null ? Ok(Mapper.Map<IEnumerable<Comment>>(comment)) : NotFound() as ActionResult;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, ex.Message);
+                Logger.LogError(ex, ex.Message);
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
@@ -159,13 +154,13 @@ namespace Reakt.Server.Controllers
         {
             try
             {
-                var comment = _mapper.Map<DM.Comment>(commentDto);
-                var createdComment = await _mediator.Send(new AddReplyCommand { CommentId = id, Comment = comment });
-                return createdComment != null ? Ok(_mapper.Map<Comment>(createdComment)) : NotFound() as ActionResult;
+                var comment = Mapper.Map<DM.Comment>(commentDto);
+                var createdComment = await Mediator.Send(new AddReplyCommand { CommentId = id, Comment = comment });
+                return createdComment != null ? Ok(Mapper.Map<Comment>(createdComment)) : NotFound() as ActionResult;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, ex.Message);
+                Logger.LogError(ex, ex.Message);
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
@@ -183,7 +178,7 @@ namespace Reakt.Server.Controllers
         {
             try
             {
-                var comment = _mapper.Map<Comment>(await _commentService.GetAsync(id, null));
+                var comment = Mapper.Map<Comment>(await Mediator.Send(new GetCommentDetailQuery { Id = id }));
                 if (comment == null)
                 {
                     return NotFound();
@@ -193,12 +188,15 @@ namespace Reakt.Server.Controllers
                 {
                     return BadRequest(ModelState);
                 }
-                var updatedComment = await _commentService.UpdateAsync(_mapper.Map<DM.Comment>(comment), null);
-                return Ok(_mapper.Map<Comment>(updatedComment));
+                var updatedComment = await Mediator.Send(new UpdateCommentCommand
+                {
+                    Comment = Mapper.Map<DM.Comment>(comment)
+                });
+                return Ok(Mapper.Map<Comment>(updatedComment));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, ex.Message);
+                Logger.LogError(ex, ex.Message);
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
