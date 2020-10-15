@@ -53,8 +53,9 @@ namespace Reakt.Application.Tests.Unit
         {
             //Arrange
             var expected = _mapper.Map<List<DM.Board>>(_context.Boards.ToList());
+            var filter = new QueryFilter { EndRange = 50, StartRange = 0, Ascending = true };
             //Act
-            var result = await _boardService.GetAsync(new QueryFilter(), null);
+            var result = await _boardService.GetAsync(filter, null);
 
             //Arrange
             result.Should().BeEquivalentTo(expected);
