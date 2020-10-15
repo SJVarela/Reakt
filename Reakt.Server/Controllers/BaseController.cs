@@ -9,15 +9,15 @@ namespace Reakt.Server.Controllers
     [ApiController]
     public abstract class BaseController : ControllerBase
     {
-        protected ILogger Logger { get; }
-        protected IMapper Mapper { get; }
-        protected IMediator Mediator { get; }
-
-        public BaseController(IMediator mediator, IMapper mapper, ILogger logger)
+        protected BaseController(IMediator mediator, IMapper mapper, ILogger logger)
         {
             Mapper = mapper;
             Logger = logger;
             Mediator = mediator;
         }
+
+        protected ILogger Logger { get; }
+        protected IMapper Mapper { get; }
+        protected IMediator Mediator { get; }
     }
 }

@@ -178,7 +178,7 @@ namespace Reakt.Server.Controllers
         {
             try
             {
-                var comment = Mapper.Map<Comment>(await Mediator.Send(new GetCommentDetailQuery() { Id = id }));
+                var comment = Mapper.Map<Comment>(await Mediator.Send(new GetCommentDetailQuery { Id = id }));
                 if (comment == null)
                 {
                     return NotFound();
