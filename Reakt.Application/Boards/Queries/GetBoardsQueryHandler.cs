@@ -20,7 +20,7 @@ namespace Reakt.Application.Boards.Queries
 
         public Task<IEnumerable<Board>> Handle(GetBoardsQuery request, CancellationToken cancellationToken)
         {
-            return _boardService.GetAsync(cancellationToken);
+            return _boardService.GetAsync(request.Filter, cancellationToken);
         }
     }
 }
