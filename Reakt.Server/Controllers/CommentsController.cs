@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
@@ -58,6 +59,10 @@ namespace Reakt.Server.Controllers
             {
                 var comment = _mapper.Map<DM.Comment>(commentDto);
                 return Ok(_mapper.Map<Comment>(await _mediator.Send(new AddCommentCommand { PostId = postId, Comment = comment })));
+            }
+            catch (ValidationException ex)
+            {
+                return BadRequest(ex.Errors);
             }
             catch (Exception ex)
             {
