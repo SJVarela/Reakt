@@ -124,7 +124,7 @@ namespace Reakt.Server.Controllers
         [HttpGet("comments/{id}/replies")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<IEnumerable<Comment>>> GetRepliesAsync(long id, QueryFilter filter)
+        public async Task<ActionResult<IEnumerable<Comment>>> GetRepliesAsync(long id, [FromQuery] QueryFilter filter)
         {
             try
             {
