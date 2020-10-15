@@ -200,7 +200,7 @@ namespace Reakt.Server.Tests.Unit
             var expected = _fixture.Build<DM.Post>()
                                    .Without(x => x.Comments)
                                    .CreateMany();
-            var filter = new QueryFilter { StartRange = 0, EndRange = 50, Ascending = true, OrderBy = "Id" };
+            var filter = new SM.Filters.QueryFilter { StartRange = 0, EndRange = 50, Ascending = true, OrderBy = "Id" };
 
             _mediator.Setup(s => s.Send(It.IsAny<GetPostsQuery>(), It.IsAny<CancellationToken>()))
                            .ReturnsAsync(expected);
@@ -215,7 +215,11 @@ namespace Reakt.Server.Tests.Unit
         [OneTimeSetUp]
         public void Setup()
         {
-            _mapper = new Mapper(new MapperConfiguration(conf => conf.AddProfile(new PostProfile())));
+            _mapper = new Mapper(new MapperConfiguration(conf =>
+            {
+                conf.AddProfile(new PostProfile());
+                conf.AddProfile(new QueryFilterProfile());
+            }));
             _postsController = new PostsController(_postsService.Object, _logger.Object, _mapper, _mediator.Object);
             _fixture = new Fixture();
             _fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList()

@@ -1,11 +1,15 @@
 ﻿using AutoMapper;
+using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Reakt.Application.Boards.Queries;
 using Reakt.Application.Contracts.Interfaces;
 using Reakt.Server.Models;
+using Reakt.Server.Models.Filters;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Reakt.Server.Controllers
@@ -19,17 +23,20 @@ namespace Reakt.Server.Controllers
         private readonly IBoardService _boardService;
         private readonly ILogger _logger;
         private readonly IMapper _mapper;
+        private readonly IMediator _mediator;
+
 
         /// <summary>
         /// </summary>
         /// <param name="boardService"></param>
         /// <param name="logger"></param>
         /// <param name="mapper"></param>
-        public BoardsController(IBoardService boardService, ILogger<BoardsController> logger, IMapper mapper)
+        public BoardsController(IBoardService boardService, ILogger<BoardsController> logger, IMapper mapper, IMediator mediator)
         {
             _boardService = boardService;
             _logger = logger;
             _mapper = mapper;
+            _mediator = mediator;
         }
 
         /// <summary>
@@ -38,11 +45,18 @@ namespace Reakt.Server.Controllers
         /// <returns>A List of boards</returns>
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<IEnumerable<Board>>> GetAsync()
+        public async Task<ActionResult<IEnumerable<Board>>> GetAsync([FromQuery] QueryFilter filter)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
             try
             {
-                return Ok(_mapper.Map<IEnumerable<Board>>(await _boardService.GetAsync(null)));
+                var boards = await _mediator.Send(new GetBoardsQuery { 
+                    Filter = _mapper.Map<Application.Contracts.Common.QueryFilter>(filter)
+                });
+                return Ok(_mapper.Map<IEnumerable<Board>>(boards));
             }
             catch (Exception ex)
             {
@@ -62,7 +76,7 @@ namespace Reakt.Server.Controllers
         {
             try
             {
-                var board = await _boardService.GetAsync(id, null);
+                var board = await _mediator.Send(new GetBoardDetailQuery { Id = id });
                 if (board is null)
                 {
                     return NotFound();

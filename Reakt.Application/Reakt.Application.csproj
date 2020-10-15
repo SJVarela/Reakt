@@ -16,4 +16,8 @@
     <ProjectReference Include="..\Reakt.Domain\Reakt.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Boards\Commands\" />
+  </ItemGroup>
+
 </Project>

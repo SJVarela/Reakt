@@ -4,11 +4,11 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Reakt.Application.Contracts.Common;
 using Reakt.Application.Contracts.Interfaces;
 using Reakt.Application.Posts.Commands.AddPost;
 using Reakt.Application.Posts.Queries;
 using Reakt.Server.Models;
+using Reakt.Server.Models.Filters;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -25,8 +25,8 @@ namespace Reakt.Server.Controllers
     {
         private readonly ILogger _logger;
         private readonly IMapper _mapper;
-        private readonly IPostService _postService;
         private readonly IMediator _mediator;
+        private readonly IPostService _postService;
 
         /// <summary>
         /// Default constructor
@@ -76,7 +76,7 @@ namespace Reakt.Server.Controllers
         {
             try
             {
-                var post = await _postService.GetAsync(id, null); 
+                var post = await _postService.GetAsync(id, null);
                 if (post == null)
                 {
                     return NotFound();
@@ -91,7 +91,6 @@ namespace Reakt.Server.Controllers
             }
         }
 
-
         /// <summary>
         /// Gets a Post by id
         /// </summary>
@@ -104,7 +103,7 @@ namespace Reakt.Server.Controllers
         {
             try
             {
-                var post = await _mediator.Send(new GetPostDetailQuery {Id = id });
+                var post = await _mediator.Send(new GetPostDetailQuery { Id = id });
                 if (post == null)
                 {
                     return NotFound();
@@ -163,7 +162,7 @@ namespace Reakt.Server.Controllers
         {
             try
             {
-                var post = _mapper.Map <Post> (await _postService.GetAsync(id, null));
+                var post = _mapper.Map<Post>(await _postService.GetAsync(id, null));
                 if (post == null)
                 {
                     return NotFound();
