@@ -119,6 +119,7 @@ namespace Reakt.Server.Controllers
         /// Gets a comment's replies
         /// </summary>
         /// <param name="id">Comment unique identifier</param>
+        /// <param name="filter">Query filter for the replies</param>
         /// <returns>List of comment's replies</returns>
         [HttpGet("comments/{id}/replies")]
         [ProducesResponseType(StatusCodes.Status200OK)]
