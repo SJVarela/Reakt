@@ -18,7 +18,7 @@ namespace Reakt.Application.Comments.Update
 
         public Task<Comment> Handle(UpdateCommentCommand request, CancellationToken cancellationToken)
         {
-            return _commentService.UpdateAsync(request.Comment);
+            return _commentService.UpdateAsync(request.Comment, cancellationToken);
         }
     }
 }

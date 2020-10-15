@@ -110,7 +110,7 @@ namespace Reakt.Server.Tests.Unit
                 conf.AddProfile(new CommentProfile());
                 conf.AddProfile(new QueryFilterProfile());
             }));
-            _commentsController = new CommentsController(_mediator.Object, _logger.Object, _mapper);
+            _commentsController = new CommentsController(_mediator.Object, _mapper, _logger.Object);
             _fixture = new Fixture();
             _fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList()
                              .ForEach(b => _fixture.Behaviors.Remove(b));
