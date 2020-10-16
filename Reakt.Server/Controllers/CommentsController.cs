@@ -119,11 +119,12 @@ namespace Reakt.Server.Controllers
         /// Gets a comment's replies
         /// </summary>
         /// <param name="id">Comment unique identifier</param>
+        /// <param name="filter">Query filter for the replies</param>
         /// <returns>List of comment's replies</returns>
         [HttpGet("comments/{id}/replies")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<IEnumerable<Comment>>> GetRepliesAsync(long id, QueryFilter filter)
+        public async Task<ActionResult<IEnumerable<Comment>>> GetRepliesAsync(long id, [FromQuery] QueryFilter filter)
         {
             try
             {

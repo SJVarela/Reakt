@@ -133,7 +133,7 @@ namespace Reakt.Server.Tests.Unit
                 conf.AddProfile(new BoardProfile());
                 conf.AddProfile(new QueryFilterProfile());
             }));
-            _boardsController = new BoardsController(_boardService.Object, _logger.Object, _mapper, _mediator.Object);
+            _boardsController = new BoardsController(_mediator.Object, _mapper, _logger.Object);
             _fixture = new Fixture();
             _fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList()
                              .ForEach(b => _fixture.Behaviors.Remove(b));

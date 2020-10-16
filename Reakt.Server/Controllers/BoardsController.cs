@@ -4,39 +4,26 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Reakt.Application.Boards.Queries;
-using Reakt.Application.Contracts.Interfaces;
 using Reakt.Server.Models;
 using Reakt.Server.Models.Filters;
 using System;
 using System.Collections.Generic;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Reakt.Server.Controllers
 {
     /// <summary>
     /// </summary>
-    [Route("api/[controller]")]
     [ApiController]
-    public class BoardsController : ControllerBase
+    public class BoardsController : BaseController
     {
-        private readonly IBoardService _boardService;
-        private readonly ILogger _logger;
-        private readonly IMapper _mapper;
-        private readonly IMediator _mediator;
-
-
         /// <summary>
         /// </summary>
-        /// <param name="boardService"></param>
-        /// <param name="logger"></param>
+        /// <param name="mediator"></param>
         /// <param name="mapper"></param>
-        public BoardsController(IBoardService boardService, ILogger<BoardsController> logger, IMapper mapper, IMediator mediator)
+        /// <param name="logger"></param>
+        public BoardsController(IMediator mediator, IMapper mapper, ILogger<BoardsController> logger) : base(mediator, mapper, logger)
         {
-            _boardService = boardService;
-            _logger = logger;
-            _mapper = mapper;
-            _mediator = mediator;
         }
 
         /// <summary>
@@ -53,14 +40,15 @@ namespace Reakt.Server.Controllers
             }
             try
             {
-                var boards = await _mediator.Send(new GetBoardsQuery { 
-                    Filter = _mapper.Map<Application.Contracts.Common.QueryFilter>(filter)
+                var boards = await Mediator.Send(new GetBoardsQuery
+                {
+                    Filter = Mapper.Map<Application.Contracts.Common.QueryFilter>(filter)
                 });
-                return Ok(_mapper.Map<IEnumerable<Board>>(boards));
+                return Ok(Mapper.Map<IEnumerable<Board>>(boards));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, ex.Message);
+                Logger.LogError(ex, ex.Message);
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
@@ -76,16 +64,16 @@ namespace Reakt.Server.Controllers
         {
             try
             {
-                var board = await _mediator.Send(new GetBoardDetailQuery { Id = id });
+                var board = await Mediator.Send(new GetBoardDetailQuery { Id = id });
                 if (board is null)
                 {
                     return NotFound();
                 }
-                return Ok(_mapper.Map<Board>(board));
+                return Ok(Mapper.Map<Board>(board));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, ex.Message);
+                Logger.LogError(ex, ex.Message);
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
