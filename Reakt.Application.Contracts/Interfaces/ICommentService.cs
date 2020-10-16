@@ -14,7 +14,7 @@ namespace Reakt.Application.Contracts.Interfaces
 
         Task<IEnumerable<Comment>> GetRepliesAsync(long parentId, QueryFilter filter, CancellationToken? cancellationToken);
 
-        void Like(long id);
+        Task<Comment> LikeAsync(long id, CancellationToken? cancellationToken);
 
         Task<Comment> ReplyAsync(long id, Comment comment, CancellationToken? cancellationToken);
     }
