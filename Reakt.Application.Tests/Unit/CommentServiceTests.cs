@@ -89,6 +89,20 @@ namespace Reakt.Application.Tests.Unit
             result.Should().BeEquivalentTo(expected);
         }
 
+        [Test]
+        public void Like_Should_Return_Updated_Result()
+        {
+            //Arrange
+            var id = _context.Comments.First().Id;
+            var expected = _mapper.Map<DM.Comment>(_context.Comments.First(x => x.Id == id)).Likes;
+
+            //Act
+            var result = _commentService.LikeAsync(id, null).Result;
+
+            //Arrange
+            result.Likes.Should().Be(expected + 1);
+        }
+
         [SetUp]
         public void Setup()
         {

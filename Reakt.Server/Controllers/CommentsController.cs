@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Reakt.Application.Comments.Commands.AddComment;
+using Reakt.Application.Comments.Commands.AddLike;
 using Reakt.Application.Comments.Commands.AddReply;
 using Reakt.Application.Comments.Commands.Update;
 using Reakt.Application.Comments.Queries.GetCommentDetail;
@@ -54,6 +55,36 @@ namespace Reakt.Server.Controllers
             catch (ValidationException ex)
             {
                 return BadRequest(ex.Errors);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+        }
+
+        /// <summary>
+        /// Like a comment
+        /// </summary>
+        /// <param name="id">Comment identifier</param>
+        /// <returns>The updated comment</returns>
+        [HttpPatch("comments/{id}/like")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<Comment>> AddLikeAsync(long id)
+        {
+            try
+            {
+                var comment = await Mediator.Send(new GetCommentDetailQuery { Id = id });
+                if (comment == null)
+                {
+                    return NotFound();
+                }
+                var updatedComment = await Mediator.Send(new AddLikeCommand
+                {
+                    CommentId = id
+                });
+                return Ok(Mapper.Map<Comment>(updatedComment));
             }
             catch (Exception ex)
             {

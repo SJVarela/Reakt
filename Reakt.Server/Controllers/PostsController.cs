@@ -115,8 +115,7 @@ namespace Reakt.Server.Controllers
         /// <param name="boardId">Board identifier</param>
         /// <param name="filter">Filters</param>
         /// <returns>List of Posts</returns>
-        [Route("boards/{boardId}/posts")]
-        [HttpGet]
+        [HttpGet("boards/{boardId}/posts")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<IEnumerable<Post>>> GetForBoardAsync([FromRoute] long boardId, [FromRoute] QueryFilter filter)

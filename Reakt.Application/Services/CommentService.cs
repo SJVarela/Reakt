@@ -85,9 +85,13 @@ namespace Reakt.Application.Services
                                          );
         }
 
-        public void Like(long id)
+        public async Task<DM.Comment> LikeAsync(long id, CancellationToken? cancellationToken)
         {
-            throw new System.NotImplementedException();
+            var comment = await _dbContext.Comments.FirstOrDefaultAsync(c => c.Id == id);
+            comment.Likes++;
+            await _dbContext.SaveChangesAsync(cancellationToken ?? new CancellationToken());
+
+            return _mapper.Map<DM.Comment>(comment);
         }
 
         public async Task<DM.Comment> ReplyAsync(long id, DM.Comment comment, CancellationToken? cancellationToken)
