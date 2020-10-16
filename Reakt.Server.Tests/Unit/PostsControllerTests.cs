@@ -12,6 +12,8 @@ using NUnit.Framework;
 using Reakt.Application.Contracts.Common;
 using Reakt.Application.Contracts.Interfaces;
 using Reakt.Application.Posts.Commands.AddPost;
+using Reakt.Application.Posts.Commands.DeletePost;
+using Reakt.Application.Posts.Commands.UpdatePost;
 using Reakt.Application.Posts.Queries;
 using Reakt.Server.Controllers;
 using Reakt.Server.MapperConfig;
@@ -82,9 +84,9 @@ namespace Reakt.Server.Tests.Unit
         public async Task DeleteAsync_Error_Should_Return_ServerError_LogError()
         {
             //Arrange
-            _postsService.Setup(x => x.GetAsync(It.IsAny<long>(), It.IsAny<CancellationToken?>()))
+            _mediator.Setup(x => x.Send(It.IsAny<GetPostDetailQuery>(), It.IsAny<CancellationToken>()))
                         .Throws<Exception>();
-            _postsService.Setup(x => x.DeleteAsync(It.IsAny<long>(), It.IsAny<CancellationToken?>()))
+            _mediator.Setup(x => x.Send(It.IsAny<DeletePostCommand>(), It.IsAny<CancellationToken>()))
                         .Throws<Exception>();
 
             //Act
@@ -111,22 +113,22 @@ namespace Reakt.Server.Tests.Unit
                                     .Without(x => x.Comments)
                                     .Create();
 
-            _postsService.Setup(x => x.GetAsync(It.IsAny<long>(), It.IsAny<CancellationToken?>())).ReturnsAsync(expected);
-            _postsService.Setup(x => x.DeleteAsync(It.IsAny<long>(), It.IsAny<CancellationToken?>())).Verifiable();
+            _mediator.Setup(x => x.Send(It.IsAny<GetPostDetailQuery>(), It.IsAny<CancellationToken>())).ReturnsAsync(expected);
+            _mediator.Setup(x => x.Send(It.IsAny<DeletePostCommand>(), It.IsAny<CancellationToken>())).Verifiable();
 
             //Act
             var result = (await _postsController.DeleteAsync(1)).Result as OkResult;
 
             //Assert
             result.StatusCode.Should().Be(StatusCodes.Status200OK);
-            _postsService.Verify(m => m.DeleteAsync(It.IsAny<long>(), It.IsAny<CancellationToken?>()), Times.Once);
+            _mediator.Verify(m => m.Send(It.IsAny<DeletePostCommand>(), It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Test]
         public async Task DeleteAsync_Should_Return_NotFound_When_Id_Not_Found()
         {
             //Arrange
-            _postsService.Setup(x => x.GetAsync(It.IsAny<long>(), It.IsAny<CancellationToken?>())).ReturnsAsync((DM.Post)null);
+            _mediator.Setup(x => x.Send(It.IsAny<GetPostDetailQuery>(), It.IsAny<CancellationToken>())).ReturnsAsync((DM.Post)null);
 
             //Act
             var result = (await _postsController.DeleteAsync(1)).Result;
@@ -220,7 +222,7 @@ namespace Reakt.Server.Tests.Unit
                 conf.AddProfile(new PostProfile());
                 conf.AddProfile(new QueryFilterProfile());
             }));
-            _postsController = new PostsController(_postsService.Object, _logger.Object, _mapper, _mediator.Object);
+            _postsController = new PostsController(_logger.Object, _mapper, _mediator.Object);
             _fixture = new Fixture();
             _fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList()
                              .ForEach(b => _fixture.Behaviors.Remove(b));
@@ -236,8 +238,8 @@ namespace Reakt.Server.Tests.Unit
             var post = _fixture.Build<SM.Post>().Create();
             patchDocument.ApplyTo(post);
 
-            _postsService.Setup(x => x.UpdateAsync(It.IsAny<DM.Post>(), It.IsAny<CancellationToken?>())).ReturnsAsync(_mapper.Map<DM.Post>(post));
-            _postsService.Setup(x => x.GetAsync(It.IsAny<long>(), It.IsAny<CancellationToken?>())).ReturnsAsync(_mapper.Map<DM.Post>(post));
+            _mediator.Setup(x => x.Send(It.IsAny<GetPostDetailQuery>(), It.IsAny<CancellationToken>())).ReturnsAsync(_mapper.Map<DM.Post>(post));
+            _mediator.Setup(x => x.Send(It.IsAny<UpdatePostCommand>(), It.IsAny<CancellationToken>())).ReturnsAsync(_mapper.Map<DM.Post>(post));
 
             //Act
             var result = (await _postsController.UpdateAsync(1, patchDocument)).Result as OkObjectResult;
